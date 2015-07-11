@@ -46,14 +46,14 @@ Levenshtein.prototype = {
         else m[i][0].parent = -1;
     },
 
-    match: function(c1, c2) {
-        if (c1 === c2) return 0;
-        return 1;
-    },
-
     _matchType: function(i, j) {
         if (this.s1[i] === this.s2[j]) return 'M';
         else return 'S';
+    },
+
+    matchCost: function(c1, c2) {
+        if (c1 === c2) return 0;
+        return 1;
     },
 
     reconstructPath: function(i, j) {
@@ -122,7 +122,7 @@ Levenshtein.prototype = {
 
         for (i = 1; i < s1.length; ++i) {
             for (j = 1; j < s2.length; ++j) {
-                opt[MATCH]  = m[i-1][j-1].cost + this.match(s1[i], s2[j]);
+                opt[MATCH]  = m[i-1][j-1].cost + this.matchCost(s1[i], s2[j]);
                 opt[INSERT] = m[i][j-1].cost + 1;
                 opt[DELETE] = m[i-1][j].cost + 1;
 
