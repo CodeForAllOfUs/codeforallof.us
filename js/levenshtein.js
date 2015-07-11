@@ -4,7 +4,7 @@ function Levenshtein(maxLen, caseSensitive) {
     }
 
     this.MAX_LEN = maxLen;
-    this.caseInsensitive = !!caseSensitive;
+    this.caseSensitive = !!caseSensitive;
     this.m = [];
     this.init();
     return this;
