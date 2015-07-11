@@ -6,7 +6,7 @@ function Levenshtein(maxLen, caseSensitive) {
     this.MAX_LEN = maxLen;
     this.caseSensitive = !!caseSensitive;
     this.m = [];
-    this.init();
+    this._init();
     return this;
 }
 
@@ -15,7 +15,7 @@ Levenshtein.prototype = {
     INSERT: 1,
     DELETE: 2,
 
-    init: function() {
+    _init: function() {
         var i, j;
         var m = this.m;
         m.length = this.MAX_LEN+1;
@@ -27,19 +27,19 @@ Levenshtein.prototype = {
                     m[i][j] = {cost: 0, parent: 0};
                 }
             }
-            this.initFirstRow(i);
-            this.initFirstColumn(i);
+            this._initFirstRow(i);
+            this._initFirstColumn(i);
         }
     },
 
-    initFirstRow: function(i) {
+    _initFirstRow: function(i) {
         var m = this.m;
         m[0][i].cost = i;
         if (i > 0) m[0][i].parent = this.INSERT;
         else m[0][i].parent = -1;
     },
 
-    initFirstColumn: function(i) {
+    _initFirstColumn: function(i) {
         var m = this.m;
         m[i][0].cost = i;
         if (i > 0) m[i][0].parent = this.DELETE;
@@ -51,7 +51,7 @@ Levenshtein.prototype = {
         return 1;
     },
 
-    matchType: function(i, j) {
+    _matchType: function(i, j) {
         if (this.s1[i] === this.s2[j]) return 'M';
         else return 'S';
     },
@@ -69,15 +69,15 @@ Levenshtein.prototype = {
         function reconstruct(i, j) {
             if (m[i][j].parent === -1) return;
 
-            var match = self.matchType(i, j);
+            var matchtype = self._matchType(i, j);
 
             if (m[i][j].parent === MATCH) {
                 reconstruct(i-1, j-1);
                 path.push({
                     i: i,
                     j: j,
-                    op: match,
-                    letter: match === 'M' ? s2[j] : s1[i] + ' => ' + s2[j],
+                    op: matchtype,
+                    letter: matchtype === 'M' ? s2[j] : s1[i] + ' => ' + s2[j],
                 });
                 return;
             }
