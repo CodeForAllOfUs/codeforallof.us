@@ -118,8 +118,8 @@ Levenshtein.prototype = {
         for (i = 1; i < s1.length; ++i) {
             for (j = 1; j < s2.length; ++j) {
                 opt[MATCH]  = m[i-1][j-1].cost + this.matchCost(s1[i], s2[j]);
-                opt[INSERT] = m[i][j-1].cost + 1;
-                opt[DELETE] = m[i-1][j].cost + 1;
+                opt[INSERT] = m[i][j-1].cost + this.insertCost(s2[j]);
+                opt[DELETE] = m[i-1][j].cost + this.deleteCost(s1[i]);
 
                 m[i][j].cost = opt[MATCH];
                 m[i][j].parent = MATCH;
@@ -137,8 +137,19 @@ Levenshtein.prototype = {
         return m[i-1][j-1].cost;
     },
 
+    // override to provide a different cost for mis/matching
     matchCost: function(c1, c2) {
         if (c1 === c2) return 0;
+        return 1;
+    },
+
+    // override to provide a different cost for insertion
+    insertCost: function(c) {
+        return 1;
+    },
+
+    // override to provide a different cost for deletion
+    deleteCost: function(c) {
         return 1;
     },
 
