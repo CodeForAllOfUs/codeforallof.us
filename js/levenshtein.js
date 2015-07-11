@@ -143,9 +143,10 @@ Levenshtein.prototype = {
     },
 
     process: function(s1, s2) {
-        var self = this;
-        var len1, len2, numSteps, path, reconstructed;
+        var len1, len2, numSteps, path;
 
+        // strings are prepended with a space to make
+        // the code for indexing the matrix easier to read
         s1 = ' ' + s1.slice(0, this.MAX_LEN);
         s2 = ' ' + s2.slice(0, this.MAX_LEN);
 
@@ -154,14 +155,19 @@ Levenshtein.prototype = {
             s2 = s2.toLowerCase();
         }
 
-        len1 = s1.length-1;
-        len2 = s2.length-1;
-
         this.s1 = s1;
         this.s2 = s2;
 
+        len1 = s1.length-1;
+        len2 = s2.length-1;
+
         numSteps = this.levenshtein();
         path = this.reconstructPath(len1, len2);
+
+        // aid user inspection of the processed strings
+        // by removing the prepended space for each
+        this.s1 = s1.slice(1);
+        this.s2 = s2.slice(1);
 
         this.results = {
             path: path,
