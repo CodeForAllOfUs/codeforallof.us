@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 function Levenshtein(maxLen, caseSensitive) {
     if (!(this instanceof Levenshtein)) {
         return new Levenshtein(maxLen, caseSensitive);
@@ -27,7 +25,7 @@ proto.init = function() {
         if (!Array.isArray(m[i])) {
             m[i] = [];
             for (j = 0; j < m.length; ++j) {
-                m[i][j] = {cost: 0, parent: 0, t:'.'};
+                m[i][j] = {cost: 0, parent: 0};
             }
         }
         this.initFirstRow(i);
@@ -52,21 +50,6 @@ proto.initFirstColumn = function(i) {
 proto.match = function(c1, c2) {
     if (c1 === c2) return 0;
     return 1;
-};
-
-proto.printMatrix = function(type) {
-    var i, j;
-    var m = this.m;
-    var out = '';
-    for (i = 0; i < m.length; ++i) {
-        for (j = 0; j < m.length; ++j) {
-            if (type === 0) out += m[i][j].cost + ' ';
-            else if (type === 1) out += m[i][j].parent + ' ';
-            else out += m[i][j].t + ' ';
-        }
-        out += '\n';
-    }
-    return out;
 };
 
 proto.matchType = function(i, j) {
@@ -133,28 +116,24 @@ proto.levenshtein = function() {
     var INSERT = this.INSERT;
     var DELETE = this.DELETE;
     var m = this.m;
-    var i, j, k, isNotMatch;
+    var i, j, k;
 
     if (s1.length <= 1) return s2.length-1;
     if (s2.length <= 1) return s1.length-1;
 
     for (i = 1; i < s1.length; ++i) {
         for (j = 1; j < s2.length; ++j) {
-            isNotMatch = this.match(s1[i], s2[j]);
-
-            opt[MATCH]  = m[i-1][j-1].cost + isNotMatch;
+            opt[MATCH]  = m[i-1][j-1].cost + this.match(s1[i], s2[j]);
             opt[INSERT] = m[i][j-1].cost + 1;
             opt[DELETE] = m[i-1][j].cost + 1;
 
             m[i][j].cost = opt[MATCH];
             m[i][j].parent = MATCH;
-            m[i][j].t = isNotMatch ? 's' : 'm';
 
             for (k = INSERT; k <= DELETE; ++k) {
                 if (opt[k] < m[i][j].cost) {
                     m[i][j].cost = opt[k];
                     m[i][j].parent = k;
-                    m[i][j].t = k === INSERT ? 'i' : 'd';
                 }
             }
         }
@@ -185,65 +164,10 @@ proto.process = function(s1, s2) {
     numSteps = this.levenshtein();
     path = this.reconstructPath(len1, len2);
 
-    reconstructed = path.map(function (step) {
-        switch (step.op) {
-            case 'D':
-                return '';
-            case 'M':
-                case 'S':
-                case 'I':
-                return self.s2[step.j];
-        }
-    }).join('');
-
     this.results = {
         path: path,
         numSteps: numSteps,
-        reconstructed: reconstructed,
     };
 
     return this;
 };
-
-proto.getPrintout = function(results) {
-    var out = [];
-    out.push(this.printMatrix(0));
-    out.push(this.printMatrix(1));
-    out.push(this.printMatrix(2));
-    return out.join('\n');
-};
-
-proto.print = function(includeMatrices) {
-    if (includeMatrices) {
-        console.log(this.getPrintout(this.results));
-    }
-    console.log('first word ( ' + this.s1.slice(1) + ' ) becomes');
-    console.log('second word: ' + this.results.reconstructed);
-    console.log('operations total: ' + this.results.numSteps);
-    console.log(this.results.path);
-    console.log();
-};
-
-function getArgs() {
-    if (process.argv.length < 4) {
-        console.log('not enough args. need two strings');
-        process.exit(1);
-    }
-
-    var s1 = process.argv[2];
-    var s2 = process.argv[3];
-
-    return [s1, s2];
-}
-
-var l = new Levenshtein(50);
-
-if (process.argv.length > 3) {
-    var args = getArgs();
-    var arg1 = args[0];
-    var arg2 = args[1];
-    l.process(arg1, arg2).print();
-}
-
-l.process('hello', 'there').print();
-l.process('hello', 'you').print();
