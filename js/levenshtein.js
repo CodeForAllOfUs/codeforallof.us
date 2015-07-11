@@ -51,12 +51,7 @@ Levenshtein.prototype = {
         else return 'S';
     },
 
-    matchCost: function(c1, c2) {
-        if (c1 === c2) return 0;
-        return 1;
-    },
-
-    reconstructPath: function(i, j) {
+    _reconstructPath: function(i, j) {
         var self = this;
         var m = this.m;
         var path = [];
@@ -107,7 +102,7 @@ Levenshtein.prototype = {
         return path;
     },
 
-    levenshtein: function() {
+    _levenshtein: function() {
         var opt = [];
         var s1 = this.s1;
         var s2 = this.s2;
@@ -142,6 +137,11 @@ Levenshtein.prototype = {
         return m[i-1][j-1].cost;
     },
 
+    matchCost: function(c1, c2) {
+        if (c1 === c2) return 0;
+        return 1;
+    },
+
     process: function(s1, s2) {
         var len1, len2, numSteps, path;
 
@@ -161,8 +161,8 @@ Levenshtein.prototype = {
         len1 = s1.length-1;
         len2 = s2.length-1;
 
-        numSteps = this.levenshtein();
-        path = this.reconstructPath(len1, len2);
+        numSteps = this._levenshtein();
+        path = this._reconstructPath(len1, len2);
 
         // aid user inspection of the processed strings
         // by removing the prepended space for each
