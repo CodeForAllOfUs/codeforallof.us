@@ -1,10 +1,12 @@
-function Levenshtein(maxLen, caseSensitive) {
+function Levenshtein(options) {
+    options = typeof options === 'object' ? options : {};
+
     if (!(this instanceof Levenshtein)) {
-        return new Levenshtein(maxLen, caseSensitive);
+        return new Levenshtein(options);
     }
 
-    this.MAX_LEN = maxLen;
-    this.caseSensitive = !!caseSensitive;
+    this.MAX_LEN = options.maxLength || 50;
+    this.caseSensitive = !!options.caseSensitive;
     this.m = [];
     this._init();
     return this;
