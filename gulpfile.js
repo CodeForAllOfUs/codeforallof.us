@@ -12,12 +12,12 @@ var autoprefixer = require('autoprefixer-core');
 var filter = require('gulp-filter');
 
 // livereload and sync
-var browserSync = require('browser-sync');
+var browserSync = require('browser-sync').create();
 var reload = browserSync.reload;
 
 // dir vars
 var source = '.';
-var dest = 'built';
+var dest = 'public';
 var destStylesDir = dest + '/styles';
 var destScriptsDir = dest + '/scripts';
 var destFontsDir = dest + '/fonts';
@@ -50,7 +50,7 @@ var sassGlob = sassDir + '/**/*.scss';
 
 // tasks
 // copy files
-gulp.task('copy', ['copy:fonts', 'copy:images']);
+gulp.task('copy', ['copy:fonts', 'copy:images', 'copy:html']);
 
 gulp.task('copy:fonts', function() {
     return gulp.src(fontsGlob)
@@ -60,6 +60,11 @@ gulp.task('copy:fonts', function() {
 gulp.task('copy:images', function() {
     return gulp.src(imagesGlob)
         .pipe(gulp.dest(destImagesDir));
+});
+
+gulp.task('copy:html', function() {
+    return gulp.src('index.html')
+        .pipe(gulp.dest(dest));
 });
 
 gulp.task('js:clean', function(cb) {
@@ -115,11 +120,29 @@ gulp.task('sass', ['css:clean'], function() {
         .pipe(gulp.dest(destStylesDir))
         // filter css for livereload
         .pipe(filter('**/*.css'))
-        .pipe(reload({ stream: true }));
+        .pipe(browserSync.stream());
 });
 
 gulp.task('default', ['js:libs', 'js:app', 'sass', 'copy'], function() {
+    browserSync.init({
+        logLevel: 'debug',
+        online: false,
+        server: {
+            baseDir: 'public',
+            index: 'index.html',
+        },
+        port: 9000,
+        ui: {
+            port: 8080,
+            weinre: {
+                port: 8000,
+            },
+        },
+    });
+
     gulp.watch(jsLibsGlob, ['js:libs']);
     gulp.watch(jsGlob, ['js:app']);
     gulp.watch(sassGlob, ['sass']);
+    gulp.watch('index.html', ['copy:html']);
+    gulp.watch(dest + '/index.html').on('change', browserSync.reload);
 });
