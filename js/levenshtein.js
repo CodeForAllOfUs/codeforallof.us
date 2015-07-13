@@ -138,17 +138,20 @@ Levenshtein.prototype = {
     },
 
     // override to provide a different cost for mis/matching
+    // receives characters to be compared
     matchCost: function(c1, c2) {
         if (c1 === c2) return 0;
         return 1;
     },
 
     // override to provide a different cost for insertion
+    // receives character to be inserted
     insertCost: function(c) {
         return 1;
     },
 
     // override to provide a different cost for deletion
+    // receives character to be deleted
     deleteCost: function(c) {
         return 1;
     },
@@ -188,3 +191,5 @@ Levenshtein.prototype = {
         return this;
     },
 };
+
+export default Levenshtein;

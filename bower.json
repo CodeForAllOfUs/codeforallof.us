@@ -1,0 +1,24 @@
+{
+  "name": "codeforallof.us",
+  "version": "1.0.0",
+  "description": "The code for the codeforallof.us website.",
+  "private": true,
+  "authors": [
+    "David Arvelo"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "loader.js": "~2.1.1",
+    "angular": "~1.4.0",
+    "html5shiv": "~3.7.2",
+    "bootstrap-sass": "~3.3.5",
+    "jquery": "~1.11.3"
+  }
+}
