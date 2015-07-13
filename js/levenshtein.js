@@ -78,35 +78,44 @@ class Levenshtein {
             if (m[i][j].parent === -1) return;
 
             var matchtype = self._matchType(i, j);
+            var node = {};
 
             if (m[i][j].parent === MATCH) {
                 reconstruct(i-1, j-1);
-                path.push({
-                    i: i,
-                    j: j,
-                    op: matchtype,
-                    letter: matchtype === 'M' ? s2[j] : s1[i] + ' => ' + s2[j],
-                });
+
+                node.i = i;
+                node.j = j;
+                node.op = matchtype;
+
+                if (matchtype === 'M') {
+                    node.letter = s2[j];
+                } else {
+                    node.from = s1[i];
+                    node.to = s2[j];
+                }
+
+                path.push(node);
                 return;
             }
             if (m[i][j].parent === INSERT) {
                 reconstruct(i, j-1);
-                path.push({
-                    i: i,
-                    j: j,
-                    op: 'I',
-                    letter: s2[j],
-                });
+
+                node.i = i;
+                node.j = j;
+                node.op = 'I';
+                node.letter = s2[j];
+
+                path.push(node);
                 return;
             }
             if (m[i][j].parent === DELETE) {
                 reconstruct(i-1, j);
-                path.push({
-                    i: i,
-                    j: j,
-                    op: 'D',
-                    letter: s1[i],
-                });
+
+                node.i = i;
+                node.op = 'D';
+                node.letter = s1[i];
+
+                path.push(node);
                 return;
             }
         }
