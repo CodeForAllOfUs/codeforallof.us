@@ -3,6 +3,7 @@ bower_components
 __pycache__
 dist
 built
+public
 .tmp
 .sass-cache
 coverage
