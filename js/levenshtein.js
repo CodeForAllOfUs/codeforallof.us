@@ -192,9 +192,6 @@ class Levenshtein {
         var m = this.m;
         var i, j, k;
 
-        if (s1.length <= 1) return s2.length-1;
-        if (s2.length <= 1) return s1.length-1;
-
         for (i = 1; i < s1.length; ++i) {
             for (j = 1; j < s2.length; ++j) {
                 opt[MATCH]  = m[i-1][j-1].cost + this.matchCost(s1[i], s2[j]);
@@ -255,7 +252,19 @@ class Levenshtein {
         len1 = s1.length-1;
         len2 = s2.length-1;
 
-        this._levenshtein();
+        if (s1.length <= 1) {
+            totalCost = s2
+                    .slice(1)
+                    .split('')
+                    .reduce((p, c) => p + this.insertCost(c), 0);
+        } else if (s2.length <= 1) {
+            totalCost = s1
+                    .slice(1)
+                    .split('')
+                    .reduce((p, c) => p + this.deleteCost(c), 0);
+        } else {
+            this._levenshtein();
+        }
 
         goalCell = this._goalCell(s1, s2);
         totalCost = this.m[goalCell.i][goalCell.j].cost;
