@@ -248,9 +248,15 @@ class Levenshtein {
 
         // reinitialize first row/column of matrix with user values
         if (name === 'insertCost') {
+            if (typeof val === 'number') {
+                this[name] = function () { return val; };
+            }
             this._initFirstRow();
         }
         if (name === 'deleteCost') {
+            if (typeof val === 'number') {
+                this[name] = function () { return val; };
+            }
             this._initFirstColumn();
         }
     }

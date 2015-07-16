@@ -326,6 +326,20 @@ describe('Levenshtein', function() {
                 l.process('hallos', 'hello!?');
                 l.results.totalCost.should.equal(170);
             });
+
+            it('accepts numbers for insert/delete cost functions', function () {
+                var l = new Levenshtein();
+                l.set('matchCost', function (c1, c2) {
+                    if (c1 === c2) {
+                        return 0;
+                    }
+                    return Infinity;
+                });
+                l.set('insertCost', 100);
+                l.set('deleteCost', 1000);
+                l.process('hi', 'shy');
+                l.results.totalCost.should.equal(1200);
+            });
         });
     });
 
