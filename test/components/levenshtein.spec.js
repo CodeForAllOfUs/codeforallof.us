@@ -21,7 +21,7 @@ describe('Levenshtein', function() {
 
                 l.type.should.equal('whole');
                 l.process('shello', 'SHmello');
-                l.results.numSteps.should.equal(3);
+                l.results.totalCost.should.equal(3);
             });
 
             it('sets first matrix row properly', function() {
@@ -53,7 +53,7 @@ describe('Levenshtein', function() {
                 });
 
                 l.process('shello', 'SHmello');
-                l.results.numSteps.should.equal(3);
+                l.results.totalCost.should.equal(3);
             });
 
             it('when case insensitive', function() {
@@ -63,7 +63,27 @@ describe('Levenshtein', function() {
                 });
 
                 l.process('shello', 'SHmello');
-                l.results.numSteps.should.equal(1);
+                l.results.totalCost.should.equal(1);
+            });
+
+            it('when first string is empty', function() {
+                var l = new Levenshtein({
+                    maxLength: 20,
+                    caseSensitive: false,
+                });
+
+                l.process('', 'SHmello');
+                l.results.totalCost.should.equal(7);
+            });
+
+            it('when second string is empty', function() {
+                var l = new Levenshtein({
+                    maxLength: 20,
+                    caseSensitive: false,
+                });
+
+                l.process('shello', '');
+                l.results.totalCost.should.equal(6);
             });
         });
 
@@ -77,33 +97,33 @@ describe('Levenshtein', function() {
                 l.process('Strode', 'sIdes');
                 l.results.path.should.deep.equal([
                     {
-                        i: 1,
+                        i: 0,
                         letter: 'S', op: 'D',
                     },
                     {
-                        i: 2,
+                        i: 1,
                         letter: 't', op: 'D',
                     },
                     {
-                        i: 3, j: 1,
+                        i: 2, j: 0,
                         op: 'S',
                         from: 'r', to: 's',
                     },
                     {
-                        i: 4, j: 2,
+                        i: 3, j: 1,
                         op: 'S',
                         from: 'o', to: 'I',
                     },
                     {
-                        i: 5, j: 3,
+                        i: 4, j: 2,
                         letter: 'd', op: 'M',
                     },
                     {
-                        i: 6, j: 4,
+                        i: 5, j: 3,
                         letter: 'e', op: 'M',
                     },
                     {
-                        i: 6, j: 5,
+                        i: 6, j: 4,
                         letter: 's', op: 'I',
                     },
                 ]);
@@ -118,33 +138,101 @@ describe('Levenshtein', function() {
                 l.process('Strode', 'sIDEs');
                 l.results.path.should.deep.equal([
                     {
-                        i: 1, j: 1,
+                        i: 0, j: 0,
                         letter: 's', op: 'M',
                     },
                     {
-                        i: 2,
+                        i: 1,
                         letter: 't', op: 'D',
                     },
                     {
-                        i: 3,
+                        i: 2,
                         letter: 'r', op: 'D',
                     },
                     {
-                        i: 4, j: 2,
+                        i: 3, j: 1,
                         op: 'S',
                         from: 'o', to: 'i',
                     },
                     {
-                        i: 5, j: 3,
+                        i: 4, j: 2,
                         letter: 'd', op: 'M',
                     },
                     {
-                        i: 6, j: 4,
+                        i: 5, j: 3,
                         letter: 'e', op: 'M',
                     },
                     {
-                        i: 6, j: 5,
+                        i: 6, j: 4,
                         letter: 's', op: 'I',
+                    },
+                ]);
+
+            });
+
+            it('when first string is empty', function() {
+                var l = new Levenshtein({
+                    maxLength: 20,
+                    caseSensitive: false,
+                });
+
+                l.process('', 'sIDEs');
+                l.results.path.should.deep.equal([
+                    {
+                        i: 0, j: 0,
+                        letter: 's', op: 'I',
+                    },
+                    {
+                        i: 0, j: 1,
+                        letter: 'i', op: 'I',
+                    },
+                    {
+                        i: 0, j: 2,
+                        letter: 'd', op: 'I',
+                    },
+                    {
+                        i: 0, j: 3,
+                        letter: 'e', op: 'I',
+                    },
+                    {
+                        i: 0, j: 4,
+                        letter: 's', op: 'I',
+                    },
+                ]);
+
+            });
+
+            it('when second string is empty', function() {
+                var l = new Levenshtein({
+                    maxLength: 20,
+                    caseSensitive: false,
+                });
+
+                l.process('Strode', '');
+                l.results.path.should.deep.equal([
+                    {
+                        i: 0,
+                        letter: 's', op: 'D',
+                    },
+                    {
+                        i: 1,
+                        letter: 't', op: 'D',
+                    },
+                    {
+                        i: 2,
+                        letter: 'r', op: 'D',
+                    },
+                    {
+                        i: 3,
+                        letter: 'o', op: 'D',
+                    },
+                    {
+                        i: 4,
+                        letter: 'd', op: 'D',
+                    },
+                    {
+                        i: 5,
+                        letter: 'e', op: 'D',
                     },
                 ]);
 
