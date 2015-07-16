@@ -44,10 +44,10 @@ describe('Levenshtein', function() {
 
                 // make sure the matrix costs are set up with
                 // the user costs in the first row and first column
-                l.set('insertCost', function(c1) {
+                l.set('insertCost', function(c) {
                     return 100;
                 });
-                l.set('deleteCost', function(c1) {
+                l.set('deleteCost', function(c) {
                     return 1000;
                 });
 
@@ -74,10 +74,10 @@ describe('Levenshtein', function() {
 
                 // make sure the matrix costs are set up with
                 // the user costs in the first row and first column
-                l.set('insertCost', function(c1) {
+                l.set('insertCost', function(c) {
                     return 100;
                 });
-                l.set('deleteCost', function(c1) {
+                l.set('deleteCost', function(c) {
                     return 1000;
                 });
 
@@ -101,10 +101,10 @@ describe('Levenshtein', function() {
 
                 // make sure the matrix costs are set up with
                 // the user costs in the first row and first column
-                l.set('insertCost', function(c1) {
+                l.set('insertCost', function(c) {
                     return 1000;
                 });
-                l.set('deleteCost', function(c1) {
+                l.set('deleteCost', function(c) {
                     return 10;
                 });
 
@@ -113,6 +113,218 @@ describe('Levenshtein', function() {
 
                 l.process('hellos', 'halo');
                 l.results.totalCost.should.equal(120);
+
+                l = new Levenshtein();
+
+                // depending on the substitution value,
+                // result is either:
+                //
+                // 3 inserts, 1 delete
+                // 2 inserts, 1 substitution
+                l.set('matchCost', function(c1, c2) {
+                    if (c1 === c2) {
+                        return 0;
+                    }
+                    return 150;
+                });
+
+                // make sure the matrix costs are set up with
+                // the user costs in the first row and first column
+                l.set('insertCost', function(c) {
+                    return 100;
+                });
+                l.set('deleteCost', function(c) {
+                    return 10;
+                });
+
+                l.process('hello', 'shallow');
+                l.results.totalCost.should.equal(310);
+            });
+
+            it('respects match costs for different characters', function () {
+                var l = new Levenshtein();
+
+                l.set('matchCost', function(c1, c2) {
+                    if (c1 === c2) {
+                        return 0;
+                    }
+                    return {
+                        a: 1,
+                        b: 10,
+                        c: 100,
+                        d: 1000,
+                    }[c1];
+                });
+
+                // make sure the matrix costs are set up with
+                // the user costs in the first row and first column
+                l.set('insertCost', function(c) {
+                    return Infinity;
+                });
+                l.set('deleteCost', function(c) {
+                    return Infinity;
+                });
+
+                l.process('abcd', 'hiya');
+                l.results.totalCost.should.equal(1111);
+
+                l = new Levenshtein();
+
+                l.set('matchCost', function(c1, c2) {
+                    if (c1 === c2) {
+                        return 0;
+                    }
+                    return {
+                        h: 1,
+                        i: 10,
+                        y: 100,
+                        a: 1000,
+                    }[c2];
+                });
+
+                // make sure the matrix costs are set up with
+                // the user costs in the first row and first column
+                l.set('insertCost', function(c) {
+                    return Infinity;
+                });
+                l.set('deleteCost', function(c) {
+                    return Infinity;
+                });
+
+                l.process('abcd', 'hiya');
+                l.results.totalCost.should.equal(1111);
+            });
+
+            it('respects insert costs for different characters', function () {
+                var l = new Levenshtein();
+
+                l.set('matchCost', function(c1, c2) {
+                    if (c1 === c2) {
+                        return 0;
+                    }
+                    return 1000;
+                });
+
+                // make sure the matrix costs are set up with
+                // the user costs in the first row and first column
+                l.set('insertCost', function(c) {
+                    return {
+                        s: 1,
+                        w: 4,
+                    }[c] || 100;
+                });
+                l.set('deleteCost', function(c) {
+                    return Infinity;
+                });
+
+                l.process('hello', 'shallow!');
+                l.results.totalCost.should.equal(1105);
+            });
+
+            it('respects delete costs for different characters', function () {
+                var l = new Levenshtein();
+
+                l.set('matchCost', function(c1, c2) {
+                    if (c1 === c2) {
+                        return 0;
+                    }
+                    return 10;
+                });
+
+                // make sure the matrix costs are set up with
+                // the user costs in the first row and first column
+                l.set('insertCost', function(c) {
+                    return 100;
+                });
+                l.set('deleteCost', function(c) {
+                    return {
+                        s: 1,
+                        w: 4,
+                    }[c] || 1000;
+                });
+
+                l.process('shallow!', 'hello');
+                l.results.totalCost.should.equal(1015);
+            });
+
+            it('works when the cost functions are set multiple times', function () {
+                var l = new Levenshtein();
+
+                l.set('matchCost', function(c1, c2) {
+                    if (c1 === c2) {
+                        return 0;
+                    }
+                    return 10;
+                });
+
+                // make sure the matrix costs are set up with
+                // the user costs in the first row and first column
+                l.set('insertCost', function(c) {
+                    return 100;
+                });
+                l.set('deleteCost', function(c) {
+                    return {
+                        s: 1,
+                        w: 4,
+                    }[c] || 1000;
+                });
+
+                l.process('shallow!', 'hello');
+                l.results.totalCost.should.equal(1015);
+
+                // change costs
+                l.set('matchCost', function(c1, c2) {
+                    if (c1 === c2) {
+                        return 0;
+                    }
+                    return Infinity;
+                });
+                l.set('insertCost', function(c) {
+                    return 100;
+                });
+                l.set('deleteCost', function(c) {
+                    return {
+                        s: 5,
+                        w: 15,
+                    }[c] || 1000;
+                });
+
+                l.process('shallow!', 'hello');
+                l.results.totalCost.should.equal(2120);
+
+                // change costs again
+                l.set('matchCost', function(c1, c2) {
+                    if (c1 === c2) {
+                        return 0;
+                    }
+                    return 76;
+                });
+                l.set('insertCost', function(c) {
+                    return 50;
+                });
+                l.set('deleteCost', function(c) {
+                    return 50;
+                });
+
+                l.process('hallos', 'hello!?');
+                l.results.totalCost.should.equal(202);
+
+                // once more
+                l.set('matchCost', function(c1, c2) {
+                    if (c1 === c2) {
+                        return 0;
+                    }
+                    return 76;
+                });
+                l.set('insertCost', function(c) {
+                    return 50;
+                });
+                l.set('deleteCost', function(c) {
+                    return 10;
+                });
+
+                l.process('hallos', 'hello!?');
+                l.results.totalCost.should.equal(170);
             });
         });
     });
