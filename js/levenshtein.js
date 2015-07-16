@@ -12,33 +12,23 @@ class Levenshtein {
 
         this.caseSensitive = !!options.caseSensitive;
         this.m = [];
-        this.setType(options.type);
+        this.set('type', options.type);
         return this;
     }
-
-    setType(type) {
-        var validTypes = ['whole', 'substring'];
-
-        if (validTypes.indexOf(type) === -1) {
-            type = 'whole';
-        }
-
-        this.type = type;
-    }
-
 
     _initFirstRowWhole() {
         var m = this.m;
         var len = m[0].length;
-        var i;
+        var s2 = this.s2;
+        var j;
 
-        for (i = 0; i < len; ++i) {
-            m[0][i].cost = i * this.insertCost();
-
-            if (i > 0) {
-                m[0][i].parent = INSERT;
+        for (j = 0; j < len; ++j) {
+            if (j > 0) {
+                m[0][j].cost = m[0][j-1].cost + this.insertCost(s2[j]);
+                m[0][j].parent = INSERT;
             } else {
-                m[0][i].parent = -1;
+                m[0][j].cost = 0;
+                m[0][j].parent = -1;
             }
         }
    }
@@ -46,15 +36,19 @@ class Levenshtein {
     _initFirstRowSubstring() {
         var m = this.m;
         var len = m[0].length;
-        var i;
+        var j;
 
-        for (i = 0; i < len; ++i) {
-            m[0][i].cost = 0;
-            m[0][i].parent = -1;
+        for (j = 0; j < len; ++j) {
+            m[0][j].cost = 0;
+            m[0][j].parent = -1;
         }
     }
 
     _initFirstRow() {
+        if (!this.m.length) {
+            return;
+        }
+
         if (this.type === 'whole') {
             this._initFirstRowWhole();
         } else if (this.type === 'substring') {
@@ -65,14 +59,15 @@ class Levenshtein {
     _initFirstColumn() {
         var m = this.m;
         var len = m.length;
+        var s1 = this.s1;
         var i;
 
         for (i = 0; i < len; ++i) {
-            m[i][0].cost = i * this.deleteCost();
-
             if (i > 0) {
+                m[i][0].cost = m[i-1][0].cost + this.deleteCost(s1[i]);
                 m[i][0].parent = DELETE;
             } else {
+                m[i][0].cost = 0;
                 m[i][0].parent = -1;
             }
         }
@@ -238,7 +233,29 @@ class Levenshtein {
         }
     }
 
-    // override to provide a different cost for mis/matching
+    set(name, val) {
+        var validTypes;
+
+        this[name] = val;
+
+        if (name === 'type') {
+            validTypes = ['whole', 'substring'];
+
+            if (validTypes.indexOf(val) === -1) {
+                this[name] = 'whole';
+            }
+        }
+
+        // reinitialize first row/column of matrix with user values
+        if (name === 'insertCost') {
+            this._initFirstRow();
+        }
+        if (name === 'deleteCost') {
+            this._initFirstColumn();
+        }
+    }
+
+    // override with .set('matchCost', fn) to provide a different cost for mis/matching
     // receives characters to be compared
     matchCost(c1, c2) {
         if (c1 === c2) {
@@ -248,13 +265,13 @@ class Levenshtein {
         return 1;
     }
 
-    // override to provide a different cost for insertion
+    // override with .set('insertCost', fn) to provide a different cost for insertion
     // receives character to be inserted
     insertCost(c) {
         return 1;
     }
 
-    // override to provide a different cost for deletion
+    // override with .set('deleteCost', fn) to provide a different cost for deletion
     // receives character to be deleted
     deleteCost(c) {
         return 1;
