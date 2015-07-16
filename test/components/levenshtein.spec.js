@@ -1,11 +1,40 @@
 import Levenshtein from '../../js/levenshtein';
 
 describe('Levenshtein', function() {
-    describe('"Whole" Type', function() {
+    describe('General', function () {
+        it('enlarges the matrix as needed', function () {
+            var l = new Levenshtein();
+            var i, len;
+
+            l.m.should.deep.equal([]);
+
+            l.process('hi', 'there');
+            len = l.m.length;
+            len.should.equal(3);
+            for (i = 0; i < len; ++i) {
+                l.m[i].length.should.equal(6);
+            }
+
+            l.process('hello', 'there!!!');
+            len = l.m.length;
+            len.should.equal(6);
+            for (i = 0; i < len; ++i) {
+                l.m[i].length.should.equal(9);
+            }
+
+            l.process('x', 'y');
+            len = l.m.length;
+            len.should.equal(6);
+            for (i = 0; i < len; ++i) {
+                l.m[i].length.should.equal(9);
+            }
+        });
+    });
+
+    describe('Type "Whole"', function() {
         describe('construction', function() {
             it('defaults to Whole Type', function() {
                 var l = new Levenshtein({
-                    maxLength: 20,
                     caseSensitive: true,
                 });
 
@@ -14,7 +43,6 @@ describe('Levenshtein', function() {
 
             it('explicitly sets Whole Type', function() {
                 var l = new Levenshtein({
-                    maxLength: 20,
                     caseSensitive: true,
                     type: 'whole',
                 });
@@ -26,7 +54,6 @@ describe('Levenshtein', function() {
 
             it('sets first matrix row properly', function() {
                 var l = new Levenshtein({
-                    maxLength: 20,
                     caseSensitive: true,
                 });
 
@@ -48,7 +75,6 @@ describe('Levenshtein', function() {
         describe('gets correct edit distance', function() {
             it('when case sensitive', function() {
                 var l = new Levenshtein({
-                    maxLength: 20,
                     caseSensitive: true,
                 });
 
@@ -58,7 +84,6 @@ describe('Levenshtein', function() {
 
             it('when case insensitive', function() {
                 var l = new Levenshtein({
-                    maxLength: 20,
                     caseSensitive: false,
                 });
 
@@ -68,7 +93,6 @@ describe('Levenshtein', function() {
 
             it('when first string is empty', function() {
                 var l = new Levenshtein({
-                    maxLength: 20,
                     caseSensitive: false,
                 });
 
@@ -78,7 +102,6 @@ describe('Levenshtein', function() {
 
             it('when second string is empty', function() {
                 var l = new Levenshtein({
-                    maxLength: 20,
                     caseSensitive: false,
                 });
 
@@ -90,7 +113,6 @@ describe('Levenshtein', function() {
         describe('gets correct edit path', function() {
             it('when case sensitive', function() {
                 var l = new Levenshtein({
-                    maxLength: 20,
                     caseSensitive: true,
                 });
 
@@ -131,7 +153,6 @@ describe('Levenshtein', function() {
 
             it('when case insensitive', function() {
                 var l = new Levenshtein({
-                    maxLength: 20,
                     caseSensitive: false,
                 });
 
@@ -172,7 +193,6 @@ describe('Levenshtein', function() {
 
             it('when first string is empty', function() {
                 var l = new Levenshtein({
-                    maxLength: 20,
                     caseSensitive: false,
                 });
 
@@ -204,7 +224,6 @@ describe('Levenshtein', function() {
 
             it('when second string is empty', function() {
                 var l = new Levenshtein({
-                    maxLength: 20,
                     caseSensitive: false,
                 });
 

@@ -10,7 +10,6 @@ class Levenshtein {
             return new Levenshtein(options);
         }
 
-        this.MAX_LEN = options.maxLength || 50;
         this.caseSensitive = !!options.caseSensitive;
         this.m = [];
         this.setType(options.type);
@@ -25,62 +24,90 @@ class Levenshtein {
         }
 
         this.type = type;
-        this._init();
     }
 
-    _init() {
-        var i, j;
-        var m = this.m;
-        var MATRIX_LEN = this.MAX_LEN+1;
 
-        for (i = 0; i < MATRIX_LEN; ++i) {
-            if (!Array.isArray(m[i])) {
-                m[i] = [];
-                for (j = 0; j < MATRIX_LEN; ++j) {
-                    m[i][j] = {};
-                }
+    _initFirstRowWhole() {
+        var m = this.m;
+        var len = m[0].length;
+        var i;
+
+        for (i = 0; i < len; ++i) {
+            m[0][i].cost = i * this.insertCost();
+
+            if (i > 0) {
+                m[0][i].parent = INSERT;
+            } else {
+                m[0][i].parent = -1;
             }
-            this._initFirstRow(i);
-            this._initFirstColumn(i);
-        }
-    }
-
-    _initFirstRowWhole(i) {
-        var m = this.m;
-
-        m[0][i].cost = i;
-
-        if (i > 0) {
-            m[0][i].parent = INSERT;
-        } else {
-            m[0][i].parent = -1;
         }
    }
 
-    _initFirstRowSubstring(i) {
+    _initFirstRowSubstring() {
         var m = this.m;
-        m[0][i].cost = 0;
-        m[0][i].parent = -1;
+        var len = m[0].length;
+        var i;
+
+        for (i = 0; i < len; ++i) {
+            m[0][i].cost = 0;
+            m[0][i].parent = -1;
+        }
     }
 
-    _initFirstRow(i) {
+    _initFirstRow() {
         if (this.type === 'whole') {
-            this._initFirstRowWhole(i);
+            this._initFirstRowWhole();
         } else if (this.type === 'substring') {
-            this._initFirstRowSubstring(i);
+            this._initFirstRowSubstring();
         }
     }
 
-    _initFirstColumn(i) {
+    _initFirstColumn() {
         var m = this.m;
+        var len = m.length;
+        var i;
 
-        m[i][0].cost = i;
+        for (i = 0; i < len; ++i) {
+            m[i][0].cost = i * this.deleteCost();
 
-        if (i > 0) {
-            m[i][0].parent = DELETE;
-        } else {
-            m[i][0].parent = -1;
+            if (i > 0) {
+                m[i][0].parent = DELETE;
+            } else {
+                m[i][0].parent = -1;
+            }
         }
+
+    }
+
+    _embiggenMatrixSize() {
+        var m = this.m;
+        var len1 = this.s1.length;
+        var len2 = this.s2.length;
+        var i, j;
+
+        if (m.length < len1) {
+            m.length = len1;
+        }
+
+        for (i = 0; i < len1; ++i) {
+            if (!Array.isArray(m[i])) {
+                m[i] = [];
+                j = 0;
+            } else {
+                j = m[i].length;
+            }
+
+            if (m[i].length < len2) {
+                m[i].length = len2;
+            }
+
+            for (; j < len2; ++j) {
+                m[i][j] = {};
+            }
+        }
+
+        this._initFirstRow();
+        this._initFirstColumn();
     }
 
     _matchType(c1, c2) {
@@ -249,15 +276,19 @@ class Levenshtein {
         this.s1 = s1;
         this.s2 = s2;
 
+        // ensure the matrix is large enough and has
+        // the right cost values in the first row/column
+        this._embiggenMatrixSize();
+
         len1 = s1.length-1;
         len2 = s2.length-1;
 
-        if (s1.length <= 1) {
+        if (len1 === 0) {
             totalCost = s2
                     .slice(1)
                     .split('')
                     .reduce((p, c) => p + this.insertCost(c), 0);
-        } else if (s2.length <= 1) {
+        } else if (len2 === 0) {
             totalCost = s1
                     .slice(1)
                     .split('')
