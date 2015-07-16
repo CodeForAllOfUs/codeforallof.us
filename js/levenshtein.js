@@ -125,7 +125,7 @@ class Levenshtein {
             if (m[i][j].parent === INSERT) {
                 reconstruct(i, j-1);
 
-                node.i = i-1;
+                node.i = i;
                 node.j = j-1;
                 node.op = 'I';
                 node.letter = s2[j];
