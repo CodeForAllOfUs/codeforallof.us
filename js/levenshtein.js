@@ -124,6 +124,21 @@ class Levenshtein {
         return path;
     }
 
+    _goalCellWhole(s1, s2) {
+        return {
+            i: s1.length-1,
+            j: s2.length-1,
+        };
+    }
+
+    _goalCell(...args) {
+        if (this.type === 'whole') {
+            return this._goalCellWhole(...args);
+        } else if (this.type === 'substring') {
+            return this._goalCellSubstring(...args);
+        }
+    }
+
     _levenshtein() {
         var opt = [];
         var s1 = this.s1;
@@ -151,9 +166,6 @@ class Levenshtein {
                 }
             }
         }
-
-        // goal_cell(s, t, i, j);
-        return m[i-1][j-1].cost;
     }
 
     // override to provide a different cost for mis/matching
@@ -197,8 +209,11 @@ class Levenshtein {
         len1 = s1.length-1;
         len2 = s2.length-1;
 
-        totalCost = this._levenshtein();
-        path = this._reconstructPath(len1, len2);
+        this._levenshtein();
+
+        goalCell = this._goalCell(s1, s2);
+        totalCost = this.m[goalCell.i][goalCell.j].cost;
+        path = this._reconstructPath(goalCell.i, goalCell.j);
 
         // aid user inspection of the processed strings
         // by removing the prepended space for each
