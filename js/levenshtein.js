@@ -58,8 +58,8 @@ class Levenshtein {
         }
     }
 
-    _matchType(i, j) {
-        if (this.s1[i] === this.s2[j]) {
+    _matchType(c1, c2) {
+        if (c1 === c2) {
             return 'M';
         } else {
             return 'S';
@@ -76,14 +76,15 @@ class Levenshtein {
         function reconstruct(i, j) {
             if (m[i][j].parent === -1) return;
 
-            var matchtype = self._matchType(i, j);
             var node = {};
+            var matchtype;
 
             if (m[i][j].parent === MATCH) {
                 reconstruct(i-1, j-1);
 
-                node.i = i;
-                node.j = j;
+                matchtype = self._matchType(s1[i], s2[j]);
+                node.i = i-1;
+                node.j = j-1;
                 node.op = matchtype;
 
                 if (matchtype === 'M') {
@@ -99,8 +100,8 @@ class Levenshtein {
             if (m[i][j].parent === INSERT) {
                 reconstruct(i, j-1);
 
-                node.i = i;
-                node.j = j;
+                node.i = i-1;
+                node.j = j-1;
                 node.op = 'I';
                 node.letter = s2[j];
 
@@ -110,7 +111,7 @@ class Levenshtein {
             if (m[i][j].parent === DELETE) {
                 reconstruct(i-1, j);
 
-                node.i = i;
+                node.i = i-1;
                 node.op = 'D';
                 node.letter = s1[i];
 
