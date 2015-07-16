@@ -13,8 +13,19 @@ class Levenshtein {
         this.MAX_LEN = options.maxLength || 50;
         this.caseSensitive = !!options.caseSensitive;
         this.m = [];
-        this._init();
+        this.setType(options.type);
         return this;
+    }
+
+    setType(type) {
+        var validTypes = ['whole', 'substring'];
+
+        if (validTypes.indexOf(type) === -1) {
+            type = 'whole';
+        }
+
+        this.type = type;
+        this._init();
     }
 
     _init() {
@@ -26,7 +37,7 @@ class Levenshtein {
             if (!Array.isArray(m[i])) {
                 m[i] = [];
                 for (j = 0; j < MATRIX_LEN; ++j) {
-                    m[i][j] = {cost: 0, parent: 0};
+                    m[i][j] = {};
                 }
             }
             this._initFirstRow(i);
@@ -34,7 +45,7 @@ class Levenshtein {
         }
     }
 
-    _initFirstRow(i) {
+    _initFirstRowWhole(i) {
         var m = this.m;
 
         m[0][i].cost = i;
@@ -43,6 +54,20 @@ class Levenshtein {
             m[0][i].parent = INSERT;
         } else {
             m[0][i].parent = -1;
+        }
+   }
+
+    _initFirstRowSubstring(i) {
+        var m = this.m;
+        m[0][i].cost = 0;
+        m[0][i].parent = -1;
+    }
+
+    _initFirstRow(i) {
+        if (this.type === 'whole') {
+            this._initFirstRowWhole(i);
+        } else if (this.type === 'substring') {
+            this._initFirstRowSubstring(i);
         }
     }
 
@@ -129,6 +154,27 @@ class Levenshtein {
             i: s1.length-1,
             j: s2.length-1,
         };
+    }
+
+    _goalCellSubstring(s1, s2) {
+        var ret = {};
+        var len2 = s2.length;
+        var m = this.m;
+        var i = s1.length-1;
+        var j = 0;
+        var k;
+
+        ret.i = i;
+
+        for (k = 1; k < len2; ++k) {
+            if (m[i][k].cost < m[i][j].cost) {
+                j = k;
+            }
+        }
+
+        ret.j = j;
+
+        return ret;
     }
 
     _goalCell(...args) {
