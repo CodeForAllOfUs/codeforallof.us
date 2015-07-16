@@ -566,7 +566,212 @@ describe('Levenshtein', function() {
                         letter: 'e', op: 'D',
                     },
                 ]);
+            });
+        });
+    });
 
+    describe('Type "Substring"', function() {
+        describe('construction', function() {
+            it('explicitly sets Substring Type', function() {
+                var l = new Levenshtein({
+                    caseSensitive: true,
+                    type: 'substring',
+                });
+
+                l.type.should.equal('substring');
+            });
+
+            it('sets first matrix row properly', function() {
+                function testMatrixRow() {
+                    var m = l.m;
+                    var MATRIX_LEN = m.length;
+                    var i;
+
+                    for (i = 0; i < MATRIX_LEN; ++i) {
+                        m[0][i].cost.should.equal(0);
+                        m[0][i].parent.should.equal(-1);
+                    }
+                }
+
+                var l = new Levenshtein({
+                    caseSensitive: true,
+                    type: 'substring',
+                });
+
+                testMatrixRow();
+                l.process('test', 'string');
+                l.set('insertCost', 10);
+                testMatrixRow();
+                l.process('test2', 'string2');
+                l.set('insertCost', 20);
+                testMatrixRow();
+
+                // switch types to test if switching back resets row
+                l.set('type', 'whole');
+                l.process('test3', 'string3');
+
+                l.set('type', 'substring');
+                testMatrixRow();
+                l.process('test4', 'string4');
+                testMatrixRow();
+            });
+        });
+
+        describe('gets correct edit distance', function() {
+            it('when case sensitive', function() {
+                var l = new Levenshtein({
+                    caseSensitive: true,
+                    type: 'substring',
+                });
+
+                l.process('shello', 'hSellHo');
+                l.results.totalCost.should.equal(3);
+
+                l.process('shello', 'ShellHo');
+                l.results.totalCost.should.equal(2);
+
+                l.process('hello', 'ShellHo');
+                l.results.totalCost.should.equal(1);
+
+                l.process('hello', 'ShelloH');
+                l.results.totalCost.should.equal(0);
+
+                l.process('Boufalo', 'the Buffalo run');
+                l.results.totalCost.should.equal(2);
+                l.process('Bouffaloo', 'the Buffalo run');
+                l.results.totalCost.should.equal(2);
+                l.process('Bouffalo', 'the Buffalo run');
+                l.results.totalCost.should.equal(1);
+                l.process('Bufalo', 'the Buffalo run');
+                l.results.totalCost.should.equal(1);
+                l.process('Buffalo', 'the Buffalo run');
+                l.results.totalCost.should.equal(0);
+
+                l.process('hello', 'WhSEeQlLlHoA');
+                // results
+                //   [ { i: 0, j: 3, op: 'S', from: 'h', to: 'E' },
+                //     { i: 1, j: 4, op: 'M', letter: 'e' },
+                //     { i: 2, j: 5, op: 'S', from: 'l', to: 'Q' },
+                //     { i: 3, j: 6, op: 'M', letter: 'l' },
+                //     { i: 4, op: 'D', letter: 'o' } ]
+                l.results.totalCost.should.equal(3);
+
+                l.set('insertCost', 0);
+                l.process('hello', 'WhSEeQlLlHoA');
+                l.results.totalCost.should.equal(0);
+            });
+
+            it('when case insensitive', function() {
+                var l = new Levenshtein({
+                    caseSensitive: false,
+                    type: 'substring',
+                });
+
+                l.set('insertCost', 0);
+                l.process('Szls', 'you snooze you lose');
+                l.results.totalCost.should.equal(0);
+
+                l.set('matchCost', 100);
+                l.set('insertCost', 1);
+                l.set('deleteCost', 100);
+                l.process('Szls', 'you snooze you lose');
+                l.results.totalCost.should.equal(10);
+
+                l.set('matchCost', 1);
+                l.set('insertCost', 2);
+                l.set('deleteCost', 100);
+                l.process('Szls', 'you snooze you lose');
+                l.results.totalCost.should.equal(3);
+
+                l.set('matchCost', 10);
+                l.set('insertCost', 4);
+                l.set('deleteCost', 1);
+                l.process('Szls', 'you snooze you lose');
+                l.results.totalCost.should.equal(3);
+            });
+        });
+
+        describe('gets correct edit path', function() {
+            it('when case sensitive', function() {
+                var l = new Levenshtein({
+                    caseSensitive: true,
+                    type: 'substring',
+                });
+
+                l.process('SeNsItIvE', 'it is all case sensitive man');
+                l.results.path.should.deep.equal([
+                    {
+                        i: 0, j: 15,
+                        op: 'S',
+                        from: 'S', to: 's',
+                    },
+                    {
+                        i: 1, j: 16,
+                        letter: 'e', op: 'M',
+                    },
+                    {
+                        i: 2, j: 17,
+                        op: 'S',
+                        from: 'N', to: 'n',
+                    },
+                    {
+                        i: 3, j: 18,
+                        letter: 's', op: 'M',
+                    },
+                    {
+                        i: 4, j: 19,
+                        op: 'S',
+                        from: 'I', to: 'i',
+                    },
+                    {
+                        i: 5, j: 20,
+                        letter: 't', op: 'M',
+                    },
+                    {
+                        i: 6, j: 21,
+                        op: 'S',
+                        from: 'I', to: 'i',
+                    },
+                    {
+                        i: 7, j: 22,
+                        letter: 'v', op: 'M',
+                    },
+                    {
+                        i: 8,
+                        letter: 'E', op: 'D',
+                    },
+                ]);
+            });
+
+            it('when case insensitive', function() {
+                var l = new Levenshtein({
+                    caseSensitive: false,
+                    type: 'substring',
+                });
+
+                l.process('Saide', 'the sIDEs of a cube');
+                l.results.path.should.deep.equal([
+                    {
+                        i: 0, j: 4,
+                        letter: 's', op: 'M',
+                    },
+                    {
+                        i: 1,
+                        letter: 'a', op: 'D',
+                    },
+                    {
+                        i: 2, j: 5,
+                        letter: 'i', op: 'M',
+                    },
+                    {
+                        i: 3, j: 6,
+                        letter: 'd', op: 'M',
+                    },
+                    {
+                        i: 4, j: 7,
+                        letter: 'e', op: 'M',
+                    },
+                ]);
             });
         });
     });
