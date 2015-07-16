@@ -41,8 +41,7 @@ class Levenshtein {
 
         if (i > 0) {
             m[0][i].parent = INSERT;
-        }
-        else {
+        } else {
             m[0][i].parent = -1;
         }
     }
@@ -179,7 +178,7 @@ class Levenshtein {
     }
 
     process(s1, s2) {
-        var len1, len2, numSteps, path;
+        var len1, len2, totalCost, path, goalCell;
 
         // strings are prepended with a space to make
         // the code for indexing the matrix easier to read
@@ -197,7 +196,7 @@ class Levenshtein {
         len1 = s1.length-1;
         len2 = s2.length-1;
 
-        numSteps = this._levenshtein();
+        totalCost = this._levenshtein();
         path = this._reconstructPath(len1, len2);
 
         // aid user inspection of the processed strings
@@ -207,7 +206,7 @@ class Levenshtein {
 
         this.results = {
             path: path,
-            numSteps: numSteps,
+            totalCost: totalCost,
         };
 
         return this;
