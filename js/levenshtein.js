@@ -234,6 +234,7 @@ class Levenshtein {
     }
 
     set(name, val) {
+        var oldType = this.type;
         var validTypes;
 
         this[name] = val;
@@ -242,21 +243,31 @@ class Levenshtein {
             validTypes = ['whole', 'substring'];
 
             if (validTypes.indexOf(val) === -1) {
-                this[name] = 'whole';
+                this.type = 'whole';
             }
-        }
-
-        // reinitialize first row/column of matrix with user values
-        if (name === 'insertCost') {
+            if (oldType !== this.type && this.type === 'substring') {
+                this._initFirstRow();
+            }
+        } else if (name === 'matchCost') {
+            if (typeof val === 'number') {
+                this[name] = function (c1, c2) {
+                    if (c1 === c2) return 0;
+                    return val;
+                };
+            }
+        } else if (name === 'insertCost') {
             if (typeof val === 'number') {
                 this[name] = function () { return val; };
             }
-            this._initFirstRow();
-        }
-        if (name === 'deleteCost') {
+            // reinitialize first row of matrix with user values
+            if (this.type !== 'substring') {
+                this._initFirstRow();
+            }
+        } else if (name === 'deleteCost') {
             if (typeof val === 'number') {
                 this[name] = function () { return val; };
             }
+            // reinitialize first column of matrix with user values
             this._initFirstColumn();
         }
     }
@@ -339,3 +350,4 @@ class Levenshtein {
 }
 
 export default Levenshtein;
+// vim: shiftwidth=4
