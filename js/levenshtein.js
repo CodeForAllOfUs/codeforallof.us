@@ -13,7 +13,6 @@ class Levenshtein {
         this.caseSensitive = !!options.caseSensitive;
         this.m = [];
         this.set('type', options.type);
-        return this;
     }
 
     _initFirstRowWhole() {
