@@ -30,6 +30,7 @@
         "afterEach": true,
         "it": true,
         "expect": true,
-        "require": true
+        "require": true,
+        "sinon": true
     }
 }

@@ -22,6 +22,8 @@
     "gulp-filter": "^2.0.2",
     "gulp-postcss": "^5.1.9",
     "gulp-sass": "^2.0.3",
-    "mocha": "^2.2.5"
+    "mocha": "^2.2.5",
+    "sinon": "^1.15.4",
+    "sinon-chai": "^2.8.0"
   }
 }
