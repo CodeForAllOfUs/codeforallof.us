@@ -85,23 +85,28 @@ describe('DataStore Prelim Tests', function () {
       expect(model).to.not.be.an.instanceof(bad);
     });
 
-    it('throws an error if that type does not exist', function () {
-      expect(store.createModelOfType.bind(store, 'noExist', { testing: '123' })).to.throw(Error);
+    it('returns an Object if that type does not exist', function () {
+      var model;
+
+      expect(store.createModelOfType.bind(store, 'noExist', { testing: '123' })).to.not.throw(Error);
+
+      model = store.createModelOfType(store, 'noExist', { testing: '123' });
+      expect(model).to.be.an('object');
+      expect(model).to.be.an.instanceof(Object);
+      expect(model.constructor).to.be.equal(Object);
     });
   });
 });
 
 // these tests assume that the DataStore sorts its model types' models by id
-describe.skip('DataStore', function () {
+describe('DataStore', function () {
   var store;
   var type = 'testType';
   var modelType;
 
   before(function () {
-    // this way we bypass having to setup and teardown an Ember.Application,
-    // and we avoid doing an `App.__container__.lookup()` which would prevent us
-    // from then tearing down the application later.
-    store = require('client/utils/data-store')['default'].create();
+    // save test time by only using one instance
+    store = new DataStore();
 
     // assumes addType works and _store exists, but the speedup of
     // not having to create and destroy new DataStores to check is
@@ -169,12 +174,12 @@ describe.skip('DataStore', function () {
       // returns a sorted array using a given modelType
       sorted = store._sortBy(modelType, key);
       expect(sorted.length).to.equal(models.length);
-      expect(sorted.mapBy('sort')).to.deep.equal([6,7,8,9,10]);
+      expect(sorted.map(obj => obj.sort)).to.deep.equal([6,7,8,9,10]);
 
       // returns a sorted array using a given string
       sorted = store._sortBy(type, key);
       expect(sorted.length).to.equal(models.length);
-      expect(sorted.mapBy('sort')).to.deep.equal([6,7,8,9,10]);
+      expect(sorted.map(obj => obj.sort)).to.deep.equal([6,7,8,9,10]);
     });
   });
 
@@ -185,35 +190,16 @@ describe.skip('DataStore', function () {
 
       newModel = store.createModelOfType(type, toCopy);
 
-      expect(Ember.Object.detectInstance(newModel)).to.be.ok;
-      expect(newModel).to.have.property('test');
-      expect(newModel.test).to.be.an('array');
-      expect(newModel.test.firstObject).to.be.an('object');
-      expect(newModel.test.firstObject.deep).to.be.a('string');
-      expect(newModel.test.firstObject.deep).to.equal('copy');
-      expect(newModel.test).to.not.equal(toCopy.test);
-    });
-
-    it('returns a deep copy of a newly-created item based off of an Ember.Object', function () {
-      var toCopy = Ember.Object.create({ test: [{deep: 'copy'}] }),
-          newModel;
-
-      newModel = store.createModelOfType(type, toCopy);
-
-      expect(Ember.Object.detectInstance(newModel)).to.be.ok;
-      expect(newModel).to.have.property('test');
-      expect(newModel.test).to.be.an('array');
-      expect(newModel.test.firstObject).to.be.an('object');
-      expect(newModel.test.firstObject.deep).to.be.a('string');
-      expect(newModel.test.firstObject.deep).to.equal('copy');
-      expect(newModel.test).to.not.equal(toCopy.test);
+      expect(newModel.constructor).to.equal(Object);
+      expect(newModel).to.deep.equal({ test: [{deep: 'copy'}] });
+      expect(newModel).to.not.equal(toCopy);
     });
 
     it('ignores non-objects when copying properties to another object', function () {
-      var newModel = store.createModelOfType(type, 'adnonda', [], { test: 1 });
+      var newModel = store.createModelOfType(type, 'anondado', [], { test: 1 });
       expect(newModel).to.be.an('object');
-      expect(Ember.Object.detectInstance(newModel)).to.be.ok;
-      expect(newModel.test).to.equal(1);
+      expect(newModel.constructor).to.equal(Object);
+      expect(newModel).to.deep.equal({ test: 1 });
     });
   });
 
@@ -232,7 +218,7 @@ describe.skip('DataStore', function () {
       store.load(type, model);
       store.all(type).length.should.equal(1);
 
-      retrieved = store.all(type).firstObject;
+      retrieved = store.all(type)[0];
       expect(retrieved).to.exist;
       retrieved.id.should.equal(model.id);
       retrieved.title.should.equal(model.title);
@@ -248,7 +234,7 @@ describe.skip('DataStore', function () {
       store.load(type, model);
       store.all(type).length.should.equal(1);
 
-      retrieved = store.all(type).firstObject;
+      retrieved = store.all(type)[0];
       expect(retrieved).to.exist;
       retrieved.id.should.equal(model[0].id);
       retrieved.title.should.equal(model[0].title);
@@ -271,12 +257,12 @@ describe.skip('DataStore', function () {
       store.load(type, model);
       store.all(type).length.should.equal(2);
 
-      retrieved = store.all(type).objectAt(0);
+      retrieved = store.all(type)[0];
       expect(retrieved).to.exist;
       retrieved.id.should.equal(fill.id);
       retrieved.title.should.equal(fill.title);
 
-      retrieved = store.all(type).objectAt(1);
+      retrieved = store.all(type)[1];
       expect(retrieved).to.exist;
       retrieved.id.should.equal(model.id);
       retrieved.title.should.equal(model.title);
@@ -299,12 +285,12 @@ describe.skip('DataStore', function () {
       store.load(type, model);
       store.all(type).length.should.equal(2);
 
-      retrieved = store.all(type).objectAt(0);
+      retrieved = store.all(type)[0];
       expect(retrieved).to.exist;
       retrieved.id.should.equal(fill.id);
       retrieved.title.should.equal(fill.title);
 
-      retrieved = store.all(type).objectAt(1);
+      retrieved = store.all(type)[1];
       expect(retrieved).to.exist;
       retrieved.id.should.equal(model[0].id);
       retrieved.title.should.equal(model[0].title);
@@ -323,12 +309,12 @@ describe.skip('DataStore', function () {
       store.load(type, models);
       store.all(type).length.should.equal(2);
 
-      retrieved = store.all(type).objectAt(0);
+      retrieved = store.all(type)[0];
       expect(retrieved).to.exist;
       retrieved.id.should.equal(models[0].id);
       retrieved.title.should.equal(models[0].title);
 
-      retrieved = store.all(type).objectAt(1);
+      retrieved = store.all(type)[1];
       expect(retrieved).to.exist;
       retrieved.id.should.equal(models[1].id);
       retrieved.title.should.equal(models[1].title);
@@ -354,17 +340,17 @@ describe.skip('DataStore', function () {
       store.load(type, models);
       store.all(type).length.should.equal(3);
 
-      retrieved = store.all(type).objectAt(0);
+      retrieved = store.all(type)[0];
       expect(retrieved).to.exist;
       retrieved.id.should.equal(models[0].id);
       retrieved.title.should.equal(models[0].title);
 
-      retrieved = store.all(type).objectAt(1);
+      retrieved = store.all(type)[1];
       expect(retrieved).to.exist;
       retrieved.id.should.equal(fill.id);
       retrieved.title.should.equal(fill.title);
 
-      retrieved = store.all(type).objectAt(2);
+      retrieved = store.all(type)[2];
       expect(retrieved).to.exist;
       retrieved.id.should.equal(models[1].id);
       retrieved.title.should.equal(models[1].title);
@@ -392,7 +378,7 @@ describe.skip('DataStore', function () {
       store.load(type, fill);
       store.all(type).length.should.equal(1);
 
-      retrieved = store.all(type).objectAt(0);
+      retrieved = store.all(type)[0];
       expect(retrieved).to.exist;
       retrieved.id.should.equal(fill.id);
       retrieved.title.should.equal(fill.title);
@@ -402,42 +388,7 @@ describe.skip('DataStore', function () {
       store.load(type, duplicate);
       store.all(type).length.should.equal(1);
 
-      retrieved = store.all(type).objectAt(0);
-      expect(retrieved).to.exist;
-      retrieved.id.should.equal(duplicate.id);
-      retrieved.title.should.equal(duplicate.title);
-      retrieved.myAttr.should.equal(duplicate.myAttr);
-      retrieved.newAttr.should.equal(duplicate.newAttr);
-    });
-
-    it('merges Ember.Objects when asked', function () {
-      var retrieved;
-      var fill = {
-        id: 1,
-        title: 'title 1',
-        myAttr: 'old'
-      };
-      var duplicate = Ember.Object.create({
-        id: 1,
-        title: 'new title',
-        myAttr: 'new',
-        newAttr: 'i am new here!'
-      });
-
-      store.load(type, fill);
-      store.all(type).length.should.equal(1);
-
-      retrieved = store.all(type).objectAt(0);
-      expect(retrieved).to.exist;
-      retrieved.id.should.equal(fill.id);
-      retrieved.title.should.equal(fill.title);
-      retrieved.myAttr.should.equal(fill.myAttr);
-      expect(retrieved.newAttr).to.not.exist;
-
-      expect(store._mergeObject).to.be.a('function');
-      store._mergeObject(retrieved, duplicate);
-
-      retrieved = store.all(type).objectAt(0);
+      retrieved = store.all(type)[0];
       expect(retrieved).to.exist;
       retrieved.id.should.equal(duplicate.id);
       retrieved.title.should.equal(duplicate.title);
@@ -510,7 +461,10 @@ describe.skip('DataStore', function () {
 
       // searching by `id`
       for (i = 1; i < 6; ++i) {
-        find = modelType.findBy('id', i);
+        find = modelType.filter(obj => obj.id === i);
+        expect(Array.isArray(find)).to.be.ok;
+        expect(find).to.have.length(1);
+        find = find[0];
         bSearch = store._binarySearch(modelType, i);
         expect(find).to.equal(bSearch);
       }
@@ -519,11 +473,14 @@ describe.skip('DataStore', function () {
       expect(store._binarySearch(modelType, 6)).to.not.exist;
 
       // searching by `sort`
-      newSort = modelType.sortBy('sort');
+      newSort = modelType.sort((a, b) => a.sort - b.sort);
       field = 'sort';
 
       for (i = 6; i < 11; ++i) {
-        find = newSort.findBy('sort', i);
+        find = newSort.filter(obj => obj.id === i);
+        expect(Array.isArray(find)).to.be.ok;
+        expect(find).to.have.length(1);
+        find = find[0];
         bSearch = store._binarySearch(newSort, i, field);
         expect(find).to.equal(bSearch);
       }
@@ -620,13 +577,13 @@ describe.skip('DataStore', function () {
       // returns all models with a given id
       find = store.all(type, models[0].id);
       expect(find).to.have.length(1);
-      expect(find.firstObject.id).to.equal(models[0].id);
+      expect(find[0].id).to.equal(models[0].id);
 
       // returns all models by a given key
       find = store.all(type, 'sort', models[models.length-1].sort);
       expect(find).to.have.length(2);
-      expect(find.objectAt(0).sort).to.equal(models[models.length-1].sort);
-      expect(find.objectAt(1).sort).to.equal(models[models.length-1].sort);
+      expect(find[0].sort).to.equal(models[models.length-1].sort);
+      expect(find[1].sort).to.equal(models[models.length-1].sort);
 
       // returns an empty array when given a non-existent key
       find = store.all(type, 'noExist', 999);
