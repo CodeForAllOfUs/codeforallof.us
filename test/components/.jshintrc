@@ -21,6 +21,7 @@
     "onevar": true,
     "white": true,
     "quotmark": "single",
+    "expr": true,
     "globals": {
         "describe": true,
         "before": true,
