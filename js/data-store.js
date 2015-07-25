@@ -68,11 +68,7 @@ DataStore.prototype = {
       throw new Error ('There is already a registered model factory of type ' + type + ' in the datastore!');
     }
 
-    if (typeof factory === 'function') {
-        factory = { create: factory };
-    }
-
-    if (factory.create === void 0) {
+    if (typeof factory !== 'function' || typeof factory.create !== 'function') {
       throw new Error ('The model factory of type ' + type + 'you are trying to register is not of the proper datatype!');
     }
 
@@ -80,7 +76,7 @@ DataStore.prototype = {
   },
 
   /**
-  * Create a new model using its factory, or if one doesn't exist, a dummy function. Can be extended from a deep clone of another object.
+  * Create a new model using its factory, or if one doesn't exist, creates a plain object. Can be extended from a deep clone of another object.
   * @param {String} type A string name representing the model type and its factory type.
   * @param {...Object} model Optional existing objects to extend from, using a deep clone.
   * @return {Object} The new object.
@@ -89,27 +85,26 @@ DataStore.prototype = {
     var factory = this._factories[type],
         model;
 
-    if (factory === void 0) {
-      throw new Error ('Could not create model of type ' + type + ', its factory did not exist!');
+    if (!factory) {
+        model = {};
+    } else {
+        model = factory.create();
     }
 
-    model = factory.create();
     this._mergeObject(...[model].concat(args));
     return model;
   },
 
   /**
-  * Load new models into the internal data storage unit of the named model type. New models will be created using a previously-registered factory of that type if it exists. The payload can be an object or an array of objects.
+  * Load new models into the internal data storage unit of the named model type. New models will be created using a previously-registered factory of that type as the base if it exists. If the factory doesn't exist, a plain object is used as the base. The payload can be an object or an array of objects. Each object *MUST* have a property named 'id' that is a Number.
   * @param {String} type A string name representing the model type, and if its factory was registered, its factory type.
   * @param {(Object|Array)} payload An object or array of objects to load into internal model storage.
   * @return
   */
   load: function (type, payload) {
-    var modelType = this._store[type],
-        emberizedItems = [],
-        foundItem;
+    var modelType = this._store[type];
 
-    if (!modelType) {
+    if (modelType === void 0) {
       throw new Error('There is no model of type ' + type + ' in the datastore!');
     }
 
@@ -117,45 +112,19 @@ DataStore.prototype = {
       throw new Error('Payload for type ' + type + ' was not an object!', payload);
     }
 
-    if (Array.isArray(payload) && payload.length === 0) {
+    if (!Array.isArray(payload)) {
+        payload = [payload];
+    }
+
+    if (payload.length === 0) {
       return;
     }
 
-    if (!Array.isArray(payload) || (payload.length === 1 && (payload = payload[0]))) {
-      foundItem = this._binarySearch(modelType, payload.id);
-
-      if (foundItem) {
-        this._mergeObject(foundItem, payload);
-      } else {
-        modelType.pushObject(this.createModelOfType(type, payload));
-      }
-
-      return;
-    }
-
-    if (!modelType.get('length')) {
-      emberizedItems = payload.map(function (obj) {
-        return this.createModelOfType(type, obj);
-      }, this);
-
-      this._store[type].pushObjects(emberizedItems);
-      return;
-    }
-
-    // now we know both payload and the modelType in the store are non-zero-length arrays.
-    // we need to check for collisions and update those that exist, and insert those that don't.
-    // we also need to be extremely careful not to modify the array while we're searching it.
-    payload.forEach(function (item) {
-      foundItem = this._binarySearch(modelType, item.id);
-
-      if (foundItem) {
-        this._mergeObject(foundItem, item);
-      } else {
-        emberizedItems.push(this.createModelOfType(type, item));
-      }
+    payload = payload.map(function (obj) {
+      return this.createModelOfType(type, obj);
     }, this);
 
-    modelType.pushObjects(emberizedItems);
+    this._pushObjects(modelType, payload);
   },
 
   /**
@@ -188,10 +157,37 @@ DataStore.prototype = {
   },
 
   /**
+  * Push new object(s) into the `modelType` data storage unit,
+  * such that all elements remain in sorted order by `id`.
+  * @param {(String|modelType)} type A string name of the internal array representation of model data of a certain type, or the array itself.
+  * @param {(Array|Object)} objs An object or objects to insert into the storage unit in sorted order.
+  * @return
+  */
+  _pushObjects: function (type, objs) {
+    var id, lastId, lastIndex;
+    var foundItem;
+    if (id === lastId) {
+      insertAt(++lastIndex);
+      continue;
+    }
+
+    // we need to check for collisions and update those that exist, and insert those that don't.
+    // we also need to be extremely careful not to modify the array while we're searching it.
+    payload.forEach(function (item) {
+      foundItem = this._binarySearch(modelType, item.id);
+
+      if (foundItem) {
+        this._mergeObject(foundItem, item);
+      } else {
+        items.push(this.createModelOfType(type, item));
+      }
+    }, this);
+  },
+
+  /**
   * Sort the internal model array by a specified key.
   * Since the arrays are always sorted by id, searching by id offers significant speedup.
-  * Uses `<` to determine whether one object's property is before another.
-  *
+  * To determine whether one object's property is before another, the `-` operator is used if the key is a Number type, and `<` otherwise.
   * @param {(String|modelType)} type A string name of the internal array representation of model data of a certain type, or the array itself.
   * @param {String} [key=id] A key name to sort by. Defaults to 'id'.
   * @return {Array} A copy of the array, but sorted by `key`.
@@ -207,18 +203,24 @@ DataStore.prototype = {
       sortedArray = type;
     }
 
-    if (key !== 'id') {
-      sortedArray = sortedArray.sortBy(key);
+    sortedArray = sortedArray.slice();
+
+    // skip if key === 'id' since array should already be sorted
+    if (sortedArray.length && key !== 'id') {
+      if (typeof sortedArray[0][key] === 'number') {
+        sortedArray.sort((a, b) => a[key] - b[key]);
+      } else {
+        sortedArray.sort((a, b) => a[key] < b[key]);
+      }
     }
 
     return sortedArray;
   },
 
   /**
-  * Search the internal model array (already sorted by `key`), for an object with type `value` in that `key`.
-  *
+  * Search the internal model array (already sorted by `key`), for an object with type `value` in that `key`. To determine whether one object's property is before another, the `-` operator is used if the key is a Number type, and `<` otherwise.
   * @param {Array} sortedArray An array that has already been sorted by `key`.
-  * @param {(String|Number|Date)} value The value to check on the current object's `key`. Anything that can be compared with `<`.
+  * @param {(String|Number|Date)} value The value to check on the current object's `key`.
   * @param {String} [key=id] The key to search objects by within sortedArray. Defaults to 'id'.
   * @return {Object} The found object or undefined.
   */
