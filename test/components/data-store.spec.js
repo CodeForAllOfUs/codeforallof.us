@@ -138,6 +138,13 @@ describe('DataStore', function () {
       expect(store.all.bind(store, 'noExist')).to.throw(Error);
     });
 
+    it('fails to load models for a non-existent type', function () {
+      var model = {
+        id: 1
+      };
+      expect(store.load.bind(store, 'noExist', model)).to.throw(Error);
+    });
+
     it('clears a type of its models', function () {
       var model = {
         id: 1
