@@ -1,4 +1,4 @@
-function deepClone(source) {
+function deepClone (source) {
   var i, prop, ret;
 
   if (Array.isArray(source)) {
@@ -30,6 +30,7 @@ DataStore.prototype = {
 
   /**
   * Empty out all data records from each internal model store. All models (but not their factories) are lost.
+  *
   * @return
   */
   clear: function () {
@@ -42,6 +43,7 @@ DataStore.prototype = {
 
   /**
   * Add a storage unit that will contain models of a given named type. It is initialized empty.
+  *
   * @param {String} type A string name of the internal array representation of model data of a certain type.
   * @return
   */
@@ -55,6 +57,7 @@ DataStore.prototype = {
 
   /**
   * Keeps a reference of the given model factory internally under the given named type. New models with that named type created from JSON or extended from an existing object-type will be created from this factory.
+  *
   * @param {String} type A string name representing the model type and its factory type.
   * @param {(Function|Object)} factory An existing function, or an object that will create a new object of its type when its `.create()` method is invoked.
   * @return
@@ -77,6 +80,7 @@ DataStore.prototype = {
 
   /**
   * Create a new model using its factory, or if one doesn't exist, creates a plain object. Can be extended from a deep clone of another object.
+  *
   * @param {String} type A string name representing the model type and its factory type.
   * @param {...Object} model Optional existing objects to extend from, using a deep clone.
   * @return {Object} The new object.
@@ -97,6 +101,7 @@ DataStore.prototype = {
 
   /**
   * Load new models into the internal data storage unit of the named model type. New models will be created using a previously-registered factory of that type as the base if it exists. If the factory doesn't exist, a plain object is used as the base. The payload can be an object or an array of objects. Each object *MUST* have a property named 'id' that is a Number.
+  *
   * @param {String} type A string name representing the model type, and if its factory was registered, its factory type.
   * @param {(Object|Array)} payload An object or array of objects to load into internal model storage.
   * @return
@@ -129,6 +134,8 @@ DataStore.prototype = {
 
   /**
   * Use the containing array to update the properties of an object it contains and notify observers.
+  *
+  * @private
   * @param {Object} obj The object you want the following arguments' object properties to be merged into.
   * @param {...Object} model Optional existing objects to extend from, using a deep clone.
   * @return
@@ -157,37 +164,116 @@ DataStore.prototype = {
   },
 
   /**
-  * Push new object(s) into the `modelType` data storage unit,
-  * such that all elements remain in sorted order by `id`.
+  * Push new object(s) into the `modelType` data storage unit, such that all elements remain in sorted order by `id`.
+  *
+  * @private
   * @param {(String|modelType)} type A string name of the internal array representation of model data of a certain type, or the array itself.
   * @param {(Array|Object)} objs An object or objects to insert into the storage unit in sorted order.
   * @return
   */
   _pushObjects: function (type, objs) {
-    var id, lastId, lastIndex;
-    var foundItem;
-    if (id === lastId) {
-      insertAt(++lastIndex);
-      continue;
-    }
+    // var id, lastId, lastIndex;
+    // var foundItem;
+    // if (id === lastId) {
+    //   insertAt(++lastIndex);
+    //   continue;
+    // }
 
     // we need to check for collisions and update those that exist, and insert those that don't.
     // we also need to be extremely careful not to modify the array while we're searching it.
-    payload.forEach(function (item) {
-      foundItem = this._binarySearch(modelType, item.id);
+    // payload.forEach(function (item) {
+    //   foundItem = this._binarySearch(modelType, item.id);
 
-      if (foundItem) {
-        this._mergeObject(foundItem, item);
+    //   if (foundItem) {
+    //     this._mergeObject(foundItem, item);
+    //   } else {
+    //     items.push(this.createModelOfType(type, item));
+    //   }
+    // }, this);
+  },
+
+  /**
+  * Find the rightmost index in an array (already sorted by `key`), where an object with `value` in its `key` property can be inserted. To determine whether the object's property is less than `value`, the `<` operator is used.
+  *
+  * @private
+  * @param {Array} sortedArray An array that has already been sorted by `key`.
+  * @param {(String|Number|Date)} value The value to compare against the objects' `key`s. Anything that can be compared with `<`.
+  * @param {String} [key=id] The key to search objects by within sortedArray. Defaults to 'id'.
+  * @return {Object} The index where an object (with object[key] === value) can be inserted.
+  */
+  _getInsertIndex: function (sortedArray, value, key) {
+    key = key || 'id';
+
+    if (value === void 0) {
+      throw new Error('The value for binary searching was undefined!');
+    }
+
+    var beg = 0;
+    var end = sortedArray.length - 1;
+    var mid;
+    var checkedItem;
+
+    while (beg <= end) {
+      mid = beg + Math.floor((end - beg) / 2);
+      checkedItem = sortedArray[mid];
+
+      if (value < checkedItem[key]) {
+        end = mid - 1;
       } else {
-        items.push(this.createModelOfType(type, item));
+        beg = mid + 1;
       }
-    }, this);
+    }
+
+    return end+1;
+  },
+
+  /**
+  * Search the internal model array (already sorted by `key`), for an object with `value` in its `key` property. To determine whether one object's property is less than `value`, the `<` operator is used.
+  *
+  * @private
+  * @param {Array} sortedArray An array that has already been sorted by `key`.
+  * @param {(String|Number|Date)} value The value to compare against the objects' `key`s. Anything that can be compared with `<`.
+  * @param {String} [key=id] The key to search objects by within sortedArray. Defaults to 'id'.
+  * @return {Object} The found object or `undefined`.
+  */
+  _binarySearch: function (sortedArray, value, key) {
+    key = key || 'id';
+
+    if (value === void 0) {
+      throw new Error('The value for binary searching was undefined!');
+    }
+
+    if (sortedArray.length === 0) {
+      return;
+    }
+
+    var beg = 0;
+    var end = sortedArray.length - 1;
+    var mid;
+    var checkedItem;
+
+    while (beg <= end) {
+      mid = beg + Math.floor((end - beg) / 2);
+      checkedItem = sortedArray[mid];
+
+      if (checkedItem[key] < value) {
+        beg = mid + 1;
+      } else if (value < checkedItem[key]) {
+        end = mid - 1;
+      } else {
+        return checkedItem;
+      }
+    }
+
+    return;
   },
 
   /**
   * Sort the internal model array by a specified key.
   * Since the arrays are always sorted by id, searching by id offers significant speedup.
-  * To determine whether one object's property is before another, the `-` operator is used if the key is a Number type, and `<` otherwise.
+  * To determine whether one object's property is before another, the `-` operator is used if the `key` holds a Number type, and `<` otherwise.
+  *
+  * @private
   * @param {(String|modelType)} type A string name of the internal array representation of model data of a certain type, or the array itself.
   * @param {String} [key=id] A key name to sort by. Defaults to 'id'.
   * @return {Array} A copy of the array, but sorted by `key`.
@@ -218,49 +304,6 @@ DataStore.prototype = {
   },
 
   /**
-  * Search the internal model array (already sorted by `key`), for an object with type `value` in that `key`. To determine whether one object's property is before another, the `-` operator is used if the key is a Number type, and `<` otherwise.
-  * @param {Array} sortedArray An array that has already been sorted by `key`.
-  * @param {(String|Number|Date)} value The value to check on the current object's `key`.
-  * @param {String} [key=id] The key to search objects by within sortedArray. Defaults to 'id'.
-  * @return {Object} The found object or undefined.
-  */
-  _binarySearch: function (sortedArray, value, key) {
-    key = key || 'id';
-
-    if (typeof value === 'undefined') {
-      throw new Error('The value for binary searching was undefined!');
-    }
-
-    if (key === 'id' && value < 0) {
-      throw new Error('The value for binary searching by id was less than zero!');
-    }
-
-    if (!sortedArray.get('length')) {
-      return;
-    }
-
-    var beg = 0,
-        end = sortedArray.get('length') - 1,
-        mid,
-        checkedItem;
-
-    while (beg <= end) {
-      mid = beg + Math.floor((end - beg) / 2);
-      checkedItem = sortedArray.objectAt(mid);
-
-      if (checkedItem[key] < value) {
-        beg = mid + 1;
-      } else if (checkedItem[key] > value) {
-        end = mid - 1;
-      } else {
-        return checkedItem;
-      }
-    }
-
-    return;
-  },
-
-  /**
   * Finds all models in modelType with key === val.
   * `key` is optional; searches `id` key by default if given two arguments.
   * `val` is optional; returns all models if not given.
@@ -268,7 +311,7 @@ DataStore.prototype = {
   * @param {String} type The name of the modelType you wish to search through.
   * @param {String} [key=id] Optional key to search modelType. Defaults to `id` if not given.
   * @param {(Number|String|Date)} val Optional value you're looking for in `key`.
-  * @returns {Array} Returns an array with any objects that matched.
+  * @return {Array} Returns an array with any objects that matched.
   */
   all: function (type, key, val) {
     var modelType = this._store[type];
@@ -299,7 +342,7 @@ DataStore.prototype = {
   * @param {String} type The name of the modelType you wish to search through.
   * @param {String} [key=id] Optional key to search modelType. Defaults to `id` if not given.
   * @param {(Number|String|Date)} val The value you're looking for in `key`.
-  * @returns {(Object|undefined)} Returns the object or undefined if it wasn't found.
+  * @return {(Object|undefined)} Returns the object or undefined if it wasn't found.
   */
   find: function (type, key, val) {
     var modelType = this._store[type];

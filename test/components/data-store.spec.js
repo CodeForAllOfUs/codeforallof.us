@@ -431,6 +431,75 @@ describe('DataStore', function () {
       store.clear();
     });
 
+    it('can find the rightmost index of a matching object', function() {
+      var newSort;
+      var find, rIndex, field, i;
+      var models = [{
+        id: 1,
+        sort: 10
+      }, {
+        id: 2,
+        sort: 9
+      }, {
+        id: 3,
+        sort: 8
+      }, {
+        id: 4,
+        sort: 7
+      }, {
+        id: 5,
+        sort: 6
+      }];
+
+      store.load(type, models);
+      modelType.length.should.equal(models.length);
+
+      // preliminary checks before actual searching is done
+      expect(store._getInsertIndex.bind(store, modelType)).to.throw(Error);
+      expect(store._getInsertIndex([], 1)).to.equal(-1);
+
+      // searching by `id`
+      for (i = 1; i < 6; ++i) {
+        // find rightmost index manually
+        find = void 0;
+        modelType.forEach((obj, idx) => {
+          if (obj.id === i) {
+            find = idx+1;
+          }
+        });
+        expect(find).to.be.a('number');
+        expect(find).to.equal(i);
+        rIndex = store._getInsertIndex(modelType, i);
+        expect(rIndex).to.be.a('number');
+        expect(rIndex).to.equal(i);
+      }
+
+      expect(store._getInsertIndex(modelType, 0)).to.equal(0);
+      expect(store._getInsertIndex(modelType, 6)).to.equal(modelType.length);
+
+      // searching by `sort`
+      newSort = modelType.slice().sort((a, b) => a.sort - b.sort);
+      field = 'sort';
+
+      for (i = 6; i < 11; ++i) {
+        // find rightmost index manually
+        find = void 0;
+        newSort.forEach((obj, idx) => {
+          if (obj.sort === i) {
+            find = idx+1;
+          }
+        });
+        expect(find).to.be.a('number');
+        expect(find).to.equal(i-5);
+        rIndex = store._getInsertIndex(newSort, i, field);
+        expect(rIndex).to.be.a('number');
+        expect(rIndex).to.equal(i-5);
+      }
+
+      expect(store._getInsertIndex(newSort, 5, field)).to.equal(0);
+      expect(store._getInsertIndex(newSort, 11, field)).to.equal(newSort.length);
+    });
+
     it('binary search works', function () {
       var newSort;
       var find, bSearch, field, i;
@@ -456,7 +525,6 @@ describe('DataStore', function () {
 
       // preliminary checks before actual searching is done
       expect(store._binarySearch.bind(store, modelType)).to.throw(Error);
-      expect(store._binarySearch.bind(store, modelType, -1)).to.throw(Error);
       expect(store._binarySearch([], 1)).to.not.exist;
 
       // searching by `id`
@@ -473,7 +541,7 @@ describe('DataStore', function () {
       expect(store._binarySearch(modelType, 6)).to.not.exist;
 
       // searching by `sort`
-      newSort = modelType.sort((a, b) => a.sort - b.sort);
+      newSort = modelType.slice().sort((a, b) => a.sort - b.sort);
       field = 'sort';
 
       for (i = 6; i < 11; ++i) {
