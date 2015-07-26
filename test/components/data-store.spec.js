@@ -303,28 +303,89 @@ describe('DataStore', function () {
       retrieved.title.should.equal(model[0].title);
     });
 
-    it('adds multiple models', function () {
-      var retrieved;
+    it('adds multiple models in sorted order', function () {
+      var i, all;
       var models = [{
-        id: 123,
-        title: 'test title 1'
+        id: 4,
       }, {
-        id: 999,
-        title: 'test title 2'
+        id: 3,
+      }, {
+        id: 1,
+      }, {
+        id: 5,
+      }, {
+        id: 2,
+      }, {
+        id: 0,
       }];
 
       store.load(type, models);
-      store.all(type).length.should.equal(2);
+      store.all(type).length.should.equal(6);
 
-      retrieved = store.all(type)[0];
-      expect(retrieved).to.exist;
-      retrieved.id.should.equal(models[0].id);
-      retrieved.title.should.equal(models[0].title);
+      all = store.all(type);
 
-      retrieved = store.all(type)[1];
-      expect(retrieved).to.exist;
-      retrieved.id.should.equal(models[1].id);
-      retrieved.title.should.equal(models[1].title);
+      for (i = 0; i < all.length; ++i) {
+        all[i].id.should.equal(i);
+      }
+    });
+
+    it('adding objects with collisions performs a merge', function () {
+      var i, all;
+      var models = [{
+        id: 4,
+        title: 'fourth',
+      }, {
+        id: 3,
+        title: 'third',
+      }, {
+        id: 1,
+        title: 'first',
+      }, {
+        id: 2,
+        title: 'second',
+      }];
+
+      var extraModels = [{
+        id: 5,
+        title: 'fifth',
+      }, {
+        id: 4,
+        title: 'four-th',
+        extra: 'data',
+      }, {
+        id: 0,
+        title: 'zeroeth',
+      }, {
+        id: 1,
+        title: 'thirst',
+        extra: 'datum',
+      }];
+
+      store.load(type, models);
+      all = store.all(type);
+      all.length.should.equal(4);
+
+      for (i = 0; i < all.length; ++i) {
+        all[i].id.should.equal(i+1);
+      }
+
+      store.load(type, extraModels);
+      all = store.all(type);
+      all.length.should.equal(6);
+
+      for (i = 0; i < all.length; ++i) {
+        all[i].id.should.equal(i);
+        if (i === 1) {
+          all[i].title.should.equal('thirst');
+          all[i].should.have.property('extra');
+          all[i].extra.should.equal('datum');
+        }
+        if (i === 4) {
+          all[i].title.should.equal('four-th');
+          all[i].should.have.property('extra');
+          all[i].extra.should.equal('data');
+        }
+      }
     });
 
     it('adds multiple models when the DataStore is not empty', function () {
@@ -463,7 +524,7 @@ describe('DataStore', function () {
 
       // preliminary checks before actual searching is done
       expect(store._getInsertIndex.bind(store, modelType)).to.throw(Error);
-      expect(store._getInsertIndex([], 1)).to.equal(-1);
+      expect(store._getInsertIndex([], 1)).to.equal(0);
 
       // searching by `id`
       for (i = 1; i < 6; ++i) {
@@ -507,7 +568,7 @@ describe('DataStore', function () {
       expect(store._getInsertIndex(newSort, 11, field)).to.equal(newSort.length);
     });
 
-    it('binary search works', function () {
+    it('correctly peforms binary search', function () {
       var newSort;
       var find, bSearch, field, i;
       var models = [{
@@ -552,7 +613,7 @@ describe('DataStore', function () {
       field = 'sort';
 
       for (i = 6; i < 11; ++i) {
-        find = newSort.filter(obj => obj.id === i);
+        find = newSort.filter(obj => obj.sort === i);
         expect(Array.isArray(find)).to.be.ok;
         expect(find).to.have.length(1);
         find = find[0];

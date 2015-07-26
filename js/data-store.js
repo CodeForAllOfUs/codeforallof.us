@@ -164,32 +164,44 @@ DataStore.prototype = {
   },
 
   /**
-  * Push new object(s) into the `modelType` data storage unit, such that all elements remain in sorted order by `id`.
+  * Push new object(s) into the `modelType` data storage unit, such that all elements remain in sorted order by `id`. Objects with ids of those that already exist in the database will be merged, rather than creating a new record.
   *
   * @private
   * @param {(String|modelType)} type A string name of the internal array representation of model data of a certain type, or the array itself.
-  * @param {(Array|Object)} objs An object or objects to insert into the storage unit in sorted order.
+  * @param {(Array|Object)} payload An object or objects to insert into the storage unit in sorted order.
   * @return
   */
-  _pushObjects: function (type, objs) {
-    // var id, lastId, lastIndex;
-    // var foundItem;
-    // if (id === lastId) {
-    //   insertAt(++lastIndex);
-    //   continue;
-    // }
+  _pushObjects: function (type, payload) {
+    var modelType;
+
+    if (typeof payload !== 'object') {
+      throw new Error('Object to be pushed into datastore for type ' + type + ' was not an object or an array!', payload);
+    }
+
+    if (!Array.isArray(payload)) {
+        payload = [payload];
+    }
+
+    if (typeof type === 'string') {
+      modelType = this._store[type];
+    } else {
+      modelType = type;
+    }
 
     // we need to check for collisions and update those that exist, and insert those that don't.
     // we also need to be extremely careful not to modify the array while we're searching it.
-    // payload.forEach(function (item) {
-    //   foundItem = this._binarySearch(modelType, item.id);
+    payload.forEach(function (item) {
+      var foundItem, insertIdx;
+      foundItem = this._binarySearch(modelType, item.id);
 
-    //   if (foundItem) {
-    //     this._mergeObject(foundItem, item);
-    //   } else {
-    //     items.push(this.createModelOfType(type, item));
-    //   }
-    // }, this);
+      if (foundItem) {
+        this._mergeObject(foundItem, item);
+      } else {
+        item = this.createModelOfType(type, item);
+        insertIdx = this._getInsertIndex(modelType, item.id);
+        modelType.splice(insertIdx, 0, item);
+      }
+    }, this);
   },
 
   /**
