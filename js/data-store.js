@@ -48,7 +48,7 @@ DataStore.prototype = {
   * @return
   */
   addType: function (type) {
-    if (typeof this._store[type] !== 'undefined') {
+    if (this._store[type] !== void 0) {
       throw new Error('A model type of type "' + type + '" already exists! Cannot add it again.');
     }
 
@@ -249,10 +249,34 @@ DataStore.prototype = {
   * @return {Object} The found object or `undefined`.
   */
   _binarySearch: function (sortedArray, value, key) {
+    var ret = this._binarySearchIndex(sortedArray, value, key);
+    if (ret) {
+      ret = ret.sortedArray[ret.idx];
+    }
+    return ret;
+  },
+
+  /**
+  * @typedef BinarySearchIndexResult
+  * @type Object
+  * @property {Array} sortedArray The array passed into _binarySearchIndex().
+  * @property {Number|undefined} idx The index of the object found by _binarySearchIndex, or `undefined`.
+  */
+
+  /**
+  * Search the internal model array (already sorted by `key`), for an object with `value` in its `key` property and return its index. To determine whether one object's property is less than `value`, the `<` operator is used.
+  *
+  * @private
+  * @param {Array} sortedArray An array that has already been sorted by `key`.
+  * @param {(String|Number|Date)} value The value to compare against the objects' `key`s. Anything that can be compared with `<`.
+  * @param {String} [key=id] The key to search objects by within sortedArray. Defaults to 'id'.
+  * @return {BinarySearchIndexResult} An object with {} index of the found object or `undefined`.
+  */
+  _binarySearchIndex: function (sortedArray, value, key) {
     key = key || 'id';
 
     if (value === void 0) {
-      throw new Error('The value for binary searching was undefined!');
+      throw new Error('The value for binary searching (for index) was undefined!');
     }
 
     if (sortedArray.length === 0) {
@@ -273,11 +297,17 @@ DataStore.prototype = {
       } else if (value < checkedItem[key]) {
         end = mid - 1;
       } else {
-        return checkedItem;
+        return {
+          sortedArray: sortedArray,
+          idx: mid,
+        };
       }
     }
 
-    return;
+    return {
+      sortedArray: sortedArray,
+      idx: void 0,
+    };
   },
 
   /**
@@ -381,20 +411,30 @@ DataStore.prototype = {
   * Remove a model or models of the given type from internal storage.
   *
   * @param {String} type The name of the modelType you wish to remove from.
-  * @param {(Object|Array)} models A model or array of models you want to remove.
+  * @param {(Object|Array)} models A model or array of models you want to remove. Uses the objects' `id` to find and remove the model in the datastore.
   * @return
   */
   deleteModels: function (type, models) {
     var modelType = this._store[type];
+    var i, idx;
 
     if (!modelType) {
       throw new Error('There is no model of type ' + type + ' in the datastore!');
     }
 
-    if (Array.isArray(models)) {
-      modelType.removeObjects(models);
-    } else if (typeof models === 'object') {
-      modelType.removeObject(models);
+    if (typeof models !== 'object') {
+      throw new Error('Models passed to deleteModel was neither an object nor an array!');
+    }
+
+    if (!Array.isArray(models)) {
+      models = [models];
+    }
+
+    for (i = 0; i < models.length; ++i) {
+      idx = this._binarySearchIndex(modelType, models[i].id).idx;
+      if (idx !== void 0) {
+        modelType.splice(idx, 1);
+      }
     }
   },
 

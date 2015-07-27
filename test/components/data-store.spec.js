@@ -210,7 +210,7 @@ describe('DataStore', function () {
     });
   });
 
-  describe('adding elements', function () {
+  describe('adding objects', function () {
     beforeEach(function () {
       store.clear();
     });
@@ -736,6 +736,49 @@ describe('DataStore', function () {
       // returns an empty array when given an id that doesn't convert to a number
       find = store.all(type, 'abcxyz');
       expect(find).to.be.empty;
+    });
+  });
+
+  describe('deleting models', function () {
+    it('should delete models given', function () {
+      var splicedModels;
+      var models = [{
+        id: 1,
+        sort: 10
+      }, {
+        id: 2,
+        sort: 9
+      }, {
+        id: 3,
+        sort: 8
+      }, {
+        id: 4,
+        sort: 7
+      }, {
+        id: 5,
+        sort: 6
+      }, {
+        id: 6,
+        sort: 6
+      }];
+
+      store.load(type, models);
+      modelType.length.should.equal(models.length);
+      modelType.should.deep.equal(models);
+
+      // remove a single object
+      store.deleteModels(type, models[5]);
+      modelType.length.should.equal(models.length-1);
+      models.splice(5, 1);
+      modelType.should.deep.equal(models);
+      modelType.length.should.equal(models.length);
+
+      // remove multiple objects
+      splicedModels = models.splice(1, 3);
+      modelType.length.should.equal(models.length+3);
+      store.deleteModels(type, splicedModels);
+      modelType.should.deep.equal(models);
+      modelType.length.should.equal(models.length);
     });
   });
 });
