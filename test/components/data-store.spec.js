@@ -740,6 +740,10 @@ describe('DataStore', function () {
   });
 
   describe('deleting models', function () {
+    beforeEach(function () {
+      store.clear();
+    });
+
     it('should delete models given', function () {
       var splicedModels;
       var models = [{
@@ -777,6 +781,61 @@ describe('DataStore', function () {
       splicedModels = models.splice(1, 3);
       modelType.length.should.equal(models.length+3);
       store.deleteModels(type, splicedModels);
+      modelType.should.deep.equal(models);
+      modelType.length.should.equal(models.length);
+    });
+
+    it('should delete models that have a key equal to a certain value', function () {
+      var models = [{
+        id: 1,
+        extra: 1,
+      }, {
+        id: 2,
+        extra: 2,
+      }, {
+        id: 3,
+        extra: 2,
+      }, {
+        id: 4,
+        extra: 3,
+      }, {
+        id: 5,
+        extra: 4,
+      }, {
+        id: 6,
+        extra: 4,
+      }, {
+        id: 7,
+        extra: 5,
+      }];
+
+      store.load(type, models);
+      modelType.length.should.equal(models.length);
+      modelType.should.deep.equal(models);
+
+      // remove a whole set of models whose `id` === 1
+      store.seekAndDestroy(type, 1);
+      modelType.length.should.equal(models.length-1);
+      models.splice(0, 1);
+      modelType.should.deep.equal(models);
+      modelType.length.should.equal(models.length);
+
+      // remove a single model using a named key
+      store.seekAndDestroy(type, 'extra', 5);
+      modelType.length.should.equal(models.length-1);
+      models.splice(models.length-1, 1);
+      modelType.should.deep.equal(models);
+      modelType.length.should.equal(models.length);
+
+      // remove whole sets of models using a named key
+      store.seekAndDestroy(type, 'extra', 2);
+      modelType.length.should.equal(models.length-2);
+      models.splice(0, 2);
+      modelType.should.deep.equal(models);
+      modelType.length.should.equal(models.length);
+      store.seekAndDestroy(type, 'extra', 4);
+      modelType.length.should.equal(models.length-2);
+      models.splice(models.length-2, 2);
       modelType.should.deep.equal(models);
       modelType.length.should.equal(models.length);
     });
