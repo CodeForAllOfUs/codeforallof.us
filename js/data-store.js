@@ -356,7 +356,7 @@ DataStore.prototype = {
   * @param {String} type The name of the modelType you wish to search through.
   * @param {String} [key=id] Optional key to search modelType. Defaults to `id` if not given.
   * @param {(Number|String|Date)} val The value you're looking for in `key`.
-  * @return {(Object|undefined)} Returns the object or undefined if it wasn't found.
+  * @return {(Object|undefined)} The object or undefined if it wasn't found.
   */
   find: function (type, key, val) {
     var modelType = this._store[type];
@@ -365,8 +365,8 @@ DataStore.prototype = {
       throw new Error('There is no model of type ' + type + ' in the datastore!');
     }
 
-    // we're searching by id, leverage the fact that it's already sorted
-    if (typeof val === 'undefined') {
+    // we're searching by id; leverage the fact that it's already sorted
+    if (val === void 0) {
       if (isNaN(parseInt(key, 10))) {
         return;
       } else {
@@ -374,7 +374,7 @@ DataStore.prototype = {
       }
     }
 
-    return modelType.findBy(key, val);
+    return modelType.find(obj => obj[key] === val);
   },
 
   /**
