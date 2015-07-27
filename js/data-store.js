@@ -323,28 +323,30 @@ DataStore.prototype = {
   * @param {String} type The name of the modelType you wish to search through.
   * @param {String} [key=id] Optional key to search modelType. Defaults to `id` if not given.
   * @param {(Number|String|Date)} val Optional value you're looking for in `key`.
-  * @return {Array} Returns an array with any objects that matched.
+  * @return {Array} An array with any objects that matched.
   */
   all: function (type, key, val) {
     var modelType = this._store[type];
+    var ret;
 
     if (!modelType) {
       throw new Error('There is no model of type ' + type + ' in the datastore!');
     }
 
-    if (typeof val === 'undefined') {
-      if (typeof key === 'undefined') {
-        return modelType;
+    if (val === void 0) {
+      if (key === void 0) {
+        return modelType.slice();
       } else if (typeof key === 'number' || !isNaN(parseInt(key, 10))) {
         // we're searching by id, leverage the fact that it's already sorted
-        return [this._binarySearch(modelType, parseInt(key, 10))];
+        ret = this._binarySearch(modelType, parseInt(key, 10));
+        return ret ? [ret] : [];
       }
 
       // no idea what we're trying to search, but it's not an number id
       return [];
     }
 
-    return modelType.filterBy(key, val);
+    return modelType.filter(obj => obj[key] === val);
   },
 
   /**

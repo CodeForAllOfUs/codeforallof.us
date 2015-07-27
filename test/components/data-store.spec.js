@@ -708,7 +708,7 @@ describe('DataStore', function () {
 
       // returns the modelType itself
       find = store.all(type);
-      expect(find).to.equal(modelType);
+      expect(find).to.deep.equal(modelType);
 
       // returns all models with a given id
       find = store.all(type, models[0].id);
@@ -723,6 +723,14 @@ describe('DataStore', function () {
 
       // returns an empty array when given a non-existent key
       find = store.all(type, 'noExist', 999);
+      expect(find).to.be.empty;
+
+      // returns an empty array when given an id that is a number
+      find = store.all(type, 1234);
+      expect(find).to.be.empty;
+
+      // returns an empty array when given an id that converts to a number
+      find = store.all(type, '1234');
       expect(find).to.be.empty;
 
       // returns an empty array when given an id that doesn't convert to a number
