@@ -20,6 +20,11 @@ function deepClone (source) {
   return ret;
 }
 
+/**
+* Creates a new DataStore container, which holds tables of records, accessed by name.
+*
+* @class
+*/
 function DataStore() {
     this._store = {};
     this._factories = {};
