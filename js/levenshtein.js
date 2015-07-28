@@ -18,7 +18,7 @@ class Levenshtein {
     _initFirstRowWhole() {
         var m = this.m;
         var len = m[0].length;
-        var s2 = this.s2;
+        var s2 = this._s2;
         var j;
 
         for (j = 0; j < len; ++j) {
@@ -58,7 +58,7 @@ class Levenshtein {
     _initFirstColumn() {
         var m = this.m;
         var len = m.length;
-        var s1 = this.s1;
+        var s1 = this._s1;
         var i;
 
         for (i = 0; i < len; ++i) {
@@ -75,8 +75,8 @@ class Levenshtein {
 
     _embiggenMatrixSize() {
         var m = this.m;
-        var len1 = this.s1.length;
-        var len2 = this.s2.length;
+        var len1 = this._s1.length;
+        var len2 = this._s2.length;
         var i, j;
 
         if (m.length < len1) {
@@ -104,70 +104,22 @@ class Levenshtein {
         this._initFirstColumn();
     }
 
+    _prepString(str) {
+        str = ' ' + str.slice(0, this.MAX_LEN);
+
+        if (!this.caseSensitive) {
+            str = str.toLowerCase();
+        }
+
+        return str;
+    }
+
     _matchType(c1, c2) {
         if (c1 === c2) {
             return 'M';
         } else {
             return 'S';
         }
-    }
-
-    _reconstructPath(i, j) {
-        var self = this;
-        var m = this.m;
-        var path = [];
-        var s1 = this.s1;
-        var s2 = this.s2;
-
-        function reconstruct(i, j) {
-            if (m[i][j].parent === -1) return;
-
-            var node = {};
-            var matchtype;
-
-            if (m[i][j].parent === MATCH) {
-                reconstruct(i-1, j-1);
-
-                matchtype = self._matchType(s1[i], s2[j]);
-                node.i = i-1;
-                node.j = j-1;
-                node.op = matchtype;
-
-                if (matchtype === 'M') {
-                    node.letter = s2[j];
-                } else {
-                    node.from = s1[i];
-                    node.to = s2[j];
-                }
-
-                path.push(node);
-                return;
-            }
-            if (m[i][j].parent === INSERT) {
-                reconstruct(i, j-1);
-
-                node.i = i;
-                node.j = j-1;
-                node.op = 'I';
-                node.letter = s2[j];
-
-                path.push(node);
-                return;
-            }
-            if (m[i][j].parent === DELETE) {
-                reconstruct(i-1, j);
-
-                node.i = i-1;
-                node.op = 'D';
-                node.letter = s1[i];
-
-                path.push(node);
-                return;
-            }
-        }
-
-        reconstruct(i, j);
-        return path;
     }
 
     _goalCellWhole(s1, s2) {
@@ -198,18 +150,21 @@ class Levenshtein {
         return ret;
     }
 
-    _goalCell(...args) {
+    _goalCell() {
+        var s1 = this._s1;
+        var s2 = this._s2;
+
         if (this.type === 'whole') {
-            return this._goalCellWhole(...args);
+            return this._goalCellWhole(s1, s2);
         } else if (this.type === 'substring') {
-            return this._goalCellSubstring(...args);
+            return this._goalCellSubstring(s1, s2);
         }
     }
 
     _levenshtein() {
         var opt = [];
-        var s1 = this.s1;
-        var s2 = this.s2;
+        var s1 = this._s1;
+        var s2 = this._s2;
         var m = this.m;
         var i, j, k;
 
@@ -271,6 +226,92 @@ class Levenshtein {
         }
     }
 
+    recursePath(func) {
+        if (typeof func !== 'function') {
+            return;
+        }
+
+        var self = this;
+        var m = this.m;
+        var s1 = this._s1;
+        var s2 = this._s2;
+        var goalCell = this._goalCell();
+
+        function recurse(i, j) {
+            if (m[i][j].parent === -1) {
+                return;
+            }
+
+            var node = {};
+            var matchtype;
+
+            if (m[i][j].parent === MATCH) {
+                recurse(i-1, j-1);
+
+                matchtype = self._matchType(s1[i], s2[j]);
+                node.i = i-1;
+                node.j = j-1;
+                node.op = matchtype;
+
+                if (matchtype === 'M') {
+                    node.letter = s2[j];
+                } else {
+                    node.from = s1[i];
+                    node.to = s2[j];
+                }
+
+                func(node);
+                return;
+            }
+            if (m[i][j].parent === INSERT) {
+                recurse(i, j-1);
+
+                node.i = i;
+                node.j = j-1;
+                node.op = 'I';
+                node.letter = s2[j];
+
+                func(node);
+                return;
+            }
+            if (m[i][j].parent === DELETE) {
+                recurse(i-1, j);
+
+                node.i = i-1;
+                node.op = 'D';
+                node.letter = s1[i];
+
+                func(node);
+                return;
+            }
+        }
+
+        recurse(goalCell.i, goalCell.j);
+    }
+
+    reconstructPath() {
+        var path = [];
+        this.recursePath(node => path.push(node));
+        return path;
+    }
+
+    totalCost() {
+        var goalCell;
+
+        if (this.s1.length === 0) {
+            return this.s2
+                    .split('')
+                    .reduce((p, c) => p + this.insertCost(c), 0);
+        } else if (this.s2.length === 0) {
+            return this.s1
+                    .split('')
+                    .reduce((p, c) => p + this.deleteCost(c), 0);
+        } else {
+            goalCell = this._goalCell();
+            return this.m[goalCell.i][goalCell.j].cost;
+        }
+    }
+
     // override with .set('matchCost', fn) to provide a different cost for mis/matching
     // receives characters to be compared
     matchCost(c1, c2) {
@@ -294,55 +335,19 @@ class Levenshtein {
     }
 
     process(s1, s2) {
-        var len1, len2, totalCost, path, goalCell;
-
-        // strings are prepended with a space to make
-        // the code for indexing the matrix easier to read
-        s1 = ' ' + s1.slice(0, this.MAX_LEN);
-        s2 = ' ' + s2.slice(0, this.MAX_LEN);
-
-        if (!this.caseSensitive) {
-            s1 = s1.toLowerCase();
-            s2 = s2.toLowerCase();
-        }
-
-        this.s1 = s1;
-        this.s2 = s2;
+        // store strings with a space prepended to work with the matrix
+        this._s1 = this._prepString(s1);
+        this._s2 = this._prepString(s2);
+        // store strings as they were given
+        this.s1 = this._s1.slice(1);
+        this.s2 = this._s2.slice(1);
 
         // ensure the matrix is large enough and has
         // the right cost values in the first row/column
         this._embiggenMatrixSize();
 
-        len1 = s1.length-1;
-        len2 = s2.length-1;
-
-        if (len1 === 0) {
-            totalCost = s2
-                    .slice(1)
-                    .split('')
-                    .reduce((p, c) => p + this.insertCost(c), 0);
-        } else if (len2 === 0) {
-            totalCost = s1
-                    .slice(1)
-                    .split('')
-                    .reduce((p, c) => p + this.deleteCost(c), 0);
-        } else {
-            this._levenshtein();
-        }
-
-        goalCell = this._goalCell(s1, s2);
-        totalCost = this.m[goalCell.i][goalCell.j].cost;
-        path = this._reconstructPath(goalCell.i, goalCell.j);
-
-        // aid user inspection of the processed strings
-        // by removing the prepended space for each
-        this.s1 = s1.slice(1);
-        this.s2 = s2.slice(1);
-
-        this.results = {
-            path: path,
-            totalCost: totalCost,
-        };
+        // perform string approximation
+        this._levenshtein();
 
         return this;
     }

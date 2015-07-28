@@ -52,13 +52,13 @@ describe('Levenshtein', function() {
                 });
 
                 l.process('hello', 'allo');
-                l.results.totalCost.should.equal(1010);
+                l.totalCost().should.equal(1010);
 
                 l.process('hello', 'hallo');
-                l.results.totalCost.should.equal(10);
+                l.totalCost().should.equal(10);
 
                 l.process('hello', 'hella');
-                l.results.totalCost.should.equal(10);
+                l.totalCost().should.equal(10);
             });
 
             it('respects insert function', function () {
@@ -82,10 +82,10 @@ describe('Levenshtein', function() {
                 });
 
                 l.process('hallo', 'Shallow');
-                l.results.totalCost.should.equal(200);
+                l.totalCost().should.equal(200);
 
                 l.process('hello', 'heallo');
-                l.results.totalCost.should.equal(100);
+                l.totalCost().should.equal(100);
             });
 
             it('respects delete function', function () {
@@ -109,10 +109,10 @@ describe('Levenshtein', function() {
                 });
 
                 l.process('hellos', 'allo');
-                l.results.totalCost.should.equal(120);
+                l.totalCost().should.equal(120);
 
                 l.process('hellos', 'halo');
-                l.results.totalCost.should.equal(120);
+                l.totalCost().should.equal(120);
 
                 l = new Levenshtein();
 
@@ -138,7 +138,7 @@ describe('Levenshtein', function() {
                 });
 
                 l.process('hello', 'shallow');
-                l.results.totalCost.should.equal(310);
+                l.totalCost().should.equal(310);
             });
 
             it('respects match costs for different characters', function () {
@@ -166,7 +166,7 @@ describe('Levenshtein', function() {
                 });
 
                 l.process('abcd', 'hiya');
-                l.results.totalCost.should.equal(1111);
+                l.totalCost().should.equal(1111);
 
                 l = new Levenshtein();
 
@@ -192,7 +192,7 @@ describe('Levenshtein', function() {
                 });
 
                 l.process('abcd', 'hiya');
-                l.results.totalCost.should.equal(1111);
+                l.totalCost().should.equal(1111);
             });
 
             it('respects insert costs for different characters', function () {
@@ -218,7 +218,7 @@ describe('Levenshtein', function() {
                 });
 
                 l.process('hello', 'shallow!');
-                l.results.totalCost.should.equal(1105);
+                l.totalCost().should.equal(1105);
             });
 
             it('respects delete costs for different characters', function () {
@@ -244,7 +244,7 @@ describe('Levenshtein', function() {
                 });
 
                 l.process('shallow!', 'hello');
-                l.results.totalCost.should.equal(1015);
+                l.totalCost().should.equal(1015);
             });
 
             it('works when the cost functions are set multiple times', function () {
@@ -270,7 +270,7 @@ describe('Levenshtein', function() {
                 });
 
                 l.process('shallow!', 'hello');
-                l.results.totalCost.should.equal(1015);
+                l.totalCost().should.equal(1015);
 
                 // change costs
                 l.set('matchCost', function(c1, c2) {
@@ -290,7 +290,7 @@ describe('Levenshtein', function() {
                 });
 
                 l.process('shallow!', 'hello');
-                l.results.totalCost.should.equal(2120);
+                l.totalCost().should.equal(2120);
 
                 // change costs again
                 l.set('matchCost', function(c1, c2) {
@@ -307,7 +307,7 @@ describe('Levenshtein', function() {
                 });
 
                 l.process('hallos', 'hello!?');
-                l.results.totalCost.should.equal(202);
+                l.totalCost().should.equal(202);
 
                 // once more
                 l.set('matchCost', function(c1, c2) {
@@ -324,7 +324,7 @@ describe('Levenshtein', function() {
                 });
 
                 l.process('hallos', 'hello!?');
-                l.results.totalCost.should.equal(170);
+                l.totalCost().should.equal(170);
             });
 
             it('accepts numbers for insert/delete cost functions', function () {
@@ -338,7 +338,35 @@ describe('Levenshtein', function() {
                 l.set('insertCost', 100);
                 l.set('deleteCost', 1000);
                 l.process('hi', 'shy');
-                l.results.totalCost.should.equal(1200);
+                l.totalCost().should.equal(1200);
+            });
+        });
+
+        describe('user-supplied recursive function', function () {
+            it('counts how many of each type of action is taken for each character', function () {
+                var l = new Levenshtein();
+                var matches = 0;
+                var substitutions = 0;
+                var inserts = 0;
+                var deletes = 0;
+
+                function countActions(node) {
+                    switch (node.op) {
+                        case 'M': matches++; break;
+                        case 'S': substitutions++; break;
+                        case 'I': inserts++; break;
+                        case 'D': deletes++; break;
+                        default: break;
+                    }
+                }
+
+                l.process('wheel', 'hello');
+                l.recursePath(countActions);
+
+                matches.should.equal(3);
+                substitutions.should.equal(1);
+                inserts.should.equal(1);
+                deletes.should.equal(1);
             });
         });
     });
@@ -361,7 +389,7 @@ describe('Levenshtein', function() {
 
                 l.type.should.equal('whole');
                 l.process('shello', 'SHmello');
-                l.results.totalCost.should.equal(3);
+                l.totalCost().should.equal(3);
             });
 
             it('sets first matrix row properly', function() {
@@ -391,7 +419,7 @@ describe('Levenshtein', function() {
                 });
 
                 l.process('shello', 'SHmello');
-                l.results.totalCost.should.equal(3);
+                l.totalCost().should.equal(3);
             });
 
             it('when case insensitive', function() {
@@ -400,7 +428,7 @@ describe('Levenshtein', function() {
                 });
 
                 l.process('shello', 'SHmello');
-                l.results.totalCost.should.equal(1);
+                l.totalCost().should.equal(1);
             });
 
             it('when first string is empty', function() {
@@ -409,7 +437,7 @@ describe('Levenshtein', function() {
                 });
 
                 l.process('', 'SHmello');
-                l.results.totalCost.should.equal(7);
+                l.totalCost().should.equal(7);
             });
 
             it('when second string is empty', function() {
@@ -418,7 +446,7 @@ describe('Levenshtein', function() {
                 });
 
                 l.process('shello', '');
-                l.results.totalCost.should.equal(6);
+                l.totalCost().should.equal(6);
             });
         });
 
@@ -429,7 +457,7 @@ describe('Levenshtein', function() {
                 });
 
                 l.process('Strode', 'sIdes');
-                l.results.path.should.deep.equal([
+                l.reconstructPath().should.deep.equal([
                     {
                         i: 0,
                         letter: 'S', op: 'D',
@@ -469,7 +497,7 @@ describe('Levenshtein', function() {
                 });
 
                 l.process('Strode', 'sIDEs');
-                l.results.path.should.deep.equal([
+                l.reconstructPath().should.deep.equal([
                     {
                         i: 0, j: 0,
                         letter: 's', op: 'M',
@@ -509,7 +537,7 @@ describe('Levenshtein', function() {
                 });
 
                 l.process('', 'sIDEs');
-                l.results.path.should.deep.equal([
+                l.reconstructPath().should.deep.equal([
                     {
                         i: 0, j: 0,
                         letter: 's', op: 'I',
@@ -540,7 +568,7 @@ describe('Levenshtein', function() {
                 });
 
                 l.process('Strode', '');
-                l.results.path.should.deep.equal([
+                l.reconstructPath().should.deep.equal([
                     {
                         i: 0,
                         letter: 's', op: 'D',
@@ -625,27 +653,27 @@ describe('Levenshtein', function() {
                 });
 
                 l.process('shello', 'hSellHo');
-                l.results.totalCost.should.equal(3);
+                l.totalCost().should.equal(3);
 
                 l.process('shello', 'ShellHo');
-                l.results.totalCost.should.equal(2);
+                l.totalCost().should.equal(2);
 
                 l.process('hello', 'ShellHo');
-                l.results.totalCost.should.equal(1);
+                l.totalCost().should.equal(1);
 
                 l.process('hello', 'ShelloH');
-                l.results.totalCost.should.equal(0);
+                l.totalCost().should.equal(0);
 
                 l.process('Boufalo', 'the Buffalo run');
-                l.results.totalCost.should.equal(2);
+                l.totalCost().should.equal(2);
                 l.process('Bouffaloo', 'the Buffalo run');
-                l.results.totalCost.should.equal(2);
+                l.totalCost().should.equal(2);
                 l.process('Bouffalo', 'the Buffalo run');
-                l.results.totalCost.should.equal(1);
+                l.totalCost().should.equal(1);
                 l.process('Bufalo', 'the Buffalo run');
-                l.results.totalCost.should.equal(1);
+                l.totalCost().should.equal(1);
                 l.process('Buffalo', 'the Buffalo run');
-                l.results.totalCost.should.equal(0);
+                l.totalCost().should.equal(0);
 
                 l.process('hello', 'WhSEeQlLlHoA');
                 // results
@@ -654,11 +682,11 @@ describe('Levenshtein', function() {
                 //     { i: 2, j: 5, op: 'S', from: 'l', to: 'Q' },
                 //     { i: 3, j: 6, op: 'M', letter: 'l' },
                 //     { i: 4, op: 'D', letter: 'o' } ]
-                l.results.totalCost.should.equal(3);
+                l.totalCost().should.equal(3);
 
                 l.set('insertCost', 0);
                 l.process('hello', 'WhSEeQlLlHoA');
-                l.results.totalCost.should.equal(0);
+                l.totalCost().should.equal(0);
             });
 
             it('when case insensitive', function() {
@@ -669,25 +697,25 @@ describe('Levenshtein', function() {
 
                 l.set('insertCost', 0);
                 l.process('Szls', 'you snooze you lose');
-                l.results.totalCost.should.equal(0);
+                l.totalCost().should.equal(0);
 
                 l.set('matchCost', 100);
                 l.set('insertCost', 1);
                 l.set('deleteCost', 100);
                 l.process('Szls', 'you snooze you lose');
-                l.results.totalCost.should.equal(10);
+                l.totalCost().should.equal(10);
 
                 l.set('matchCost', 1);
                 l.set('insertCost', 2);
                 l.set('deleteCost', 100);
                 l.process('Szls', 'you snooze you lose');
-                l.results.totalCost.should.equal(3);
+                l.totalCost().should.equal(3);
 
                 l.set('matchCost', 10);
                 l.set('insertCost', 4);
                 l.set('deleteCost', 1);
                 l.process('Szls', 'you snooze you lose');
-                l.results.totalCost.should.equal(3);
+                l.totalCost().should.equal(3);
             });
         });
 
@@ -699,7 +727,7 @@ describe('Levenshtein', function() {
                 });
 
                 l.process('SeNsItIvE', 'it is all case sensitive man');
-                l.results.path.should.deep.equal([
+                l.reconstructPath().should.deep.equal([
                     {
                         i: 0, j: 15,
                         op: 'S',
@@ -750,7 +778,7 @@ describe('Levenshtein', function() {
                 });
 
                 l.process('Saide', 'the sIDEs of a cube');
-                l.results.path.should.deep.equal([
+                l.reconstructPath().should.deep.equal([
                     {
                         i: 0, j: 4,
                         letter: 's', op: 'M',
