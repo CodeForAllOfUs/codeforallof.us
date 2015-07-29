@@ -83,17 +83,89 @@ describe('DataStore Prelim Tests', function () {
       model = store.createModelOfType(type, { testing: '123' });
       expect(model).to.be.an.instanceof(Factory);
       expect(model).to.not.be.an.instanceof(bad);
+      expect(model).to.not.have.property('testing');
     });
 
-    it('returns an Object if that type does not exist', function () {
+    it('calls `.create()` on the factory to create the object', function () {
+      function ShallowData (...args) {
+        var i, obj, prop;
+        for (i = 0; i < args.length; ++i) {
+          obj = args[i];
+          for (prop in obj) {
+            if (obj.hasOwnProperty(prop)) {
+              this[prop] = obj[prop];
+            }
+          }
+        }
+      }
+      // apply variable-length arguments to constructor
+      ShallowData.create = function () {
+        var obj = Object.create(this.prototype);
+        return this.apply(obj, arguments) || obj;
+      };
+
+      var model;
+      var copy = {
+          testArray: [1,2,3],
+          testObject: {one: 1}
+      };
+
+      store.addType(type);
+      expect(store.registerModelFactory.bind(store, type, ShallowData)).to.not.throw(Error);
+      expect(store._factories[type]).to.exist;
+
+      expect(store.createModelOfType).to.be.a('function');
+
+      model = store.createModelOfType(type, copy);
+      expect(model).to.be.an.instanceof(ShallowData);
+      expect(model.constructor).to.be.equal(ShallowData);
+      expect(model).to.have.property('testObject');
+      expect(model.testObject).to.equal(copy.testObject);
+      expect(model.testObject).to.not.have.property('two');
+      copy.testObject.two = 2;
+      expect(model.testObject).to.have.property('two');
+      expect(model.testObject.two).to.equal(2);
+      expect(model).to.have.property('testArray');
+      expect(model.testArray).to.equal(copy.testArray);
+      expect(model.testArray).to.have.length(3);
+      copy.testArray.push(4);
+      expect(model.testArray).to.have.length(4);
+    });
+
+    it('returns an Object if that factory type does not exist', function () {
       var model;
 
-      expect(store.createModelOfType.bind(store, 'noExist', { testing: '123' })).to.not.throw(Error);
+      expect(store.createModelOfType.bind(store, 'noExist')).to.not.throw(Error);
 
-      model = store.createModelOfType(store, 'noExist', { testing: '123' });
+      model = store.createModelOfType(store, 'noExist');
       expect(model).to.be.an('object');
       expect(model).to.be.an.instanceof(Object);
       expect(model.constructor).to.be.equal(Object);
+    });
+
+    it('performs deep copy of arguments properties if that factory type does not exist', function () {
+      var model;
+      var copy = {
+          testArray: [1,2,3],
+          testObject: {one: 1}
+      };
+
+      expect(store.createModelOfType.bind(store, 'noExist', copy)).to.not.throw(Error);
+
+      model = store.createModelOfType(store, 'noExist', copy);
+      expect(model).to.be.an('object');
+      expect(model).to.be.an.instanceof(Object);
+      expect(model.constructor).to.be.equal(Object);
+      expect(model).to.have.property('testObject');
+      expect(model.testObject).to.not.equal(copy.testObject);
+      expect(model.testObject).to.not.have.property('two');
+      copy.testObject.two = 2;
+      expect(model.testObject).to.not.have.property('two');
+      expect(model).to.have.property('testArray');
+      expect(model.testArray).to.not.equal(copy.testArray);
+      expect(model.testArray).to.have.length(3);
+      copy.testArray.push(4);
+      expect(model.testArray).to.have.length(3);
     });
   });
 });

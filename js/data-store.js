@@ -94,10 +94,10 @@ DataStore.prototype = {
   },
 
   /**
-  * Create a new model using its factory, or if one doesn't exist, creates a plain object. Can be extended from a deep clone of another object.
+  * Create a new model using its factory, or if one doesn't exist, creates a plain object that can be extended by a deep clone of arguments that are objects.
   *
   * @param {String} type A string name representing the model type and its factory type.
-  * @param {...Object} model Optional existing objects to extend from, using a deep clone.
+  * @param {...Object} model Optional. When a factory exists, these are passed to `factory.create()`. When no factory exists, a deep clone is made of each object into the newly-created model.
   * @return {Object} The new object.
   */
   createModelOfType: function (type, ...args) {
@@ -106,11 +106,11 @@ DataStore.prototype = {
 
     if (!factory) {
         model = {};
+        this._mergeObject(...[model].concat(args));
     } else {
-        model = factory.create();
+        model = factory.create(...args);
     }
 
-    this._mergeObject(...[model].concat(args));
     return model;
   },
 
