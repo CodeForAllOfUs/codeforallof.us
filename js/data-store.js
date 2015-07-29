@@ -213,6 +213,7 @@ DataStore.prototype = {
   * Find the rightmost index in an array (already sorted by `key`), where an object with `value` in its `key` property can be inserted. To determine whether the object's property is less than `value`, the `<` operator is used.
   *
   * @private
+  * @throws {Error} `value` must be of the same type as that held by `key`, since `<` can't meaningfully compare different types.
   * @param {Array} sortedArray An array that has already been sorted by `key`.
   * @param {(String|Number|Date)} value The value to compare against the objects' `key`s. Anything that can be compared with `<`.
   * @param {String} [key=id] The key to search objects by within sortedArray. Defaults to 'id'.
@@ -222,7 +223,16 @@ DataStore.prototype = {
     key = key || 'id';
 
     if (value === void 0) {
-      throw new Error('The value for binary searching was undefined!');
+      throw new Error('The value for getting insert index was undefined!');
+    }
+
+    if (sortedArray.length === 0) {
+      return 0;
+    }
+
+    // values of different types can't be meaningfully compared with '<'
+    if (typeof sortedArray[0][key] !== typeof value) {
+      throw new Error('The value for getting insert index, "' + value + '" was not of the same type as that held by object key, "' + key + '"!');
     }
 
     var beg = 0;
@@ -275,7 +285,7 @@ DataStore.prototype = {
   * @param {Array} sortedArray An array that has already been sorted by `key`.
   * @param {(String|Number|Date)} value The value to compare against the objects' `key`s. Anything that can be compared with `<`.
   * @param {String} [key=id] The key to search objects by within sortedArray. Defaults to 'id'.
-  * @return {BinarySearchIndexResult} An object with {} index of the found object or `undefined`.
+  * @return {BinarySearchIndexResult} An object with the index of the found object or `undefined`.
   */
   _binarySearchIndex: function (sortedArray, value, key) {
     key = key || 'id';
@@ -284,7 +294,10 @@ DataStore.prototype = {
       throw new Error('The value for binary searching (for index) was undefined!');
     }
 
-    if (sortedArray.length === 0) {
+    // values of different types can't be meaningfully compared with '<'
+    if (sortedArray.length === 0 ||
+        typeof sortedArray[0][key] !== typeof value)
+    {
       return;
     }
 
@@ -327,23 +340,34 @@ DataStore.prototype = {
   */
   _sortBy: function (type, key) {
     var sortedArray;
+    var modelType = this._store[type];
 
     key = key || 'id';
 
     if (typeof type === 'string') {
-      sortedArray = this._store[type];
+      sortedArray = modelType;
     } else {
       sortedArray = type;
     }
 
     sortedArray = sortedArray.slice();
 
-    // skip if key === 'id' since array should already be sorted
-    if (sortedArray.length && key !== 'id') {
+    // skip if type === modelType && key === 'id' since it should already be sorted
+    if (sortedArray.length && (type !== modelType || key !== 'id')) {
       if (typeof sortedArray[0][key] === 'number') {
         sortedArray.sort((a, b) => a[key] - b[key]);
       } else {
-        sortedArray.sort((a, b) => a[key] < b[key]);
+        sortedArray.sort((a, b) => {
+          var akey = a[key];
+          var bkey = b[key];
+          if (akey < bkey) {
+            return -1;
+          } else if (bkey < akey) {
+            return 1;
+          } else {
+            return 0;
+          }
+        });
       }
     }
 
@@ -371,14 +395,11 @@ DataStore.prototype = {
     if (val === void 0) {
       if (key === void 0) {
         return modelType.slice();
-      } else if (typeof key === 'number' || !isNaN(parseInt(key, 10))) {
+      } else {
         // we're searching by id, leverage the fact that it's already sorted
-        ret = this._binarySearch(modelType, parseInt(key, 10));
+        ret = this._binarySearch(modelType, key);
         return ret ? [ret] : [];
       }
-
-      // no idea what we're trying to search, but it's not an number id
-      return [];
     }
 
     return modelType.filter(obj => obj[key] === val);
@@ -402,21 +423,17 @@ DataStore.prototype = {
 
     // we're searching by id; leverage the fact that it's already sorted
     if (val === void 0) {
-      if (isNaN(parseInt(key, 10))) {
-        return;
-      } else {
-        return this._binarySearch(modelType, parseInt(key, 10));
-      }
+      return this._binarySearch(modelType, key);
     }
 
     return modelType.find(obj => obj[key] === val);
   },
 
   /**
-  * Remove a model or models of the given type from internal storage.
+  * Remove a model or models of the given type from internal storage. Uses the models' `id` to find and remove it from the datastore.
   *
   * @param {String} type The name of the modelType you wish to remove from.
-  * @param {(Object|Array)} models A model or array of models you want to remove. Uses the objects' `id` to find and remove the model in the datastore.
+  * @param {(Object|Array)} models A model or array of models you want to remove.
   * @return
   */
   deleteModels: function (type, models) {

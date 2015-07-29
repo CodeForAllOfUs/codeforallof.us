@@ -156,37 +156,47 @@ describe('DataStore', function () {
     });
 
     it('sorts a modelType container by a given key', function () {
-      var key = 'sort';
       var sorted;
       var models = [{
         id: 1,
-        sort: 10
+        sort: 10,
+        string: 'act',
       }, {
         id: 2,
-        sort: 9
+        sort: 9,
+        string: 'bad',
       }, {
         id: 3,
-        sort: 8
+        sort: 8,
+        string: 'art',
       }, {
         id: 4,
-        sort: 7
+        sort: 7,
+        string: 'sushi',
       }, {
         id: 5,
-        sort: 6
+        sort: 6,
+        string: 'farm',
       }];
 
       store.load(type, models);
       modelType.length.should.equal(5);
 
       // returns a sorted array using a given modelType
-      sorted = store._sortBy(modelType, key);
+      sorted = store._sortBy(modelType, 'sort');
       expect(sorted.length).to.equal(models.length);
       expect(sorted.map(obj => obj.sort)).to.deep.equal([6,7,8,9,10]);
+      sorted = store._sortBy(modelType, 'string');
+      expect(sorted.length).to.equal(models.length);
+      expect(sorted.map(obj => obj.string)).to.deep.equal(['act', 'art', 'bad', 'farm', 'sushi']);
 
       // returns a sorted array using a given string
-      sorted = store._sortBy(type, key);
+      sorted = store._sortBy(type, 'sort');
       expect(sorted.length).to.equal(models.length);
       expect(sorted.map(obj => obj.sort)).to.deep.equal([6,7,8,9,10]);
+      sorted = store._sortBy(type, 'string');
+      expect(sorted.length).to.equal(models.length);
+      expect(sorted.map(obj => obj.string)).to.deep.equal(['act', 'art', 'bad', 'farm', 'sushi']);
     });
   });
 
@@ -329,6 +339,29 @@ describe('DataStore', function () {
       }
     });
 
+    it('adds multiple models in sorted order when the id is a string type', function () {
+      var all;
+      var models = [{
+        id: 'act',
+      }, {
+        id: 'bad',
+      }, {
+        id: 'art',
+      }, {
+        id: 'biscuit',
+      }, {
+        id: 'sushi',
+      }, {
+        id: 'farm',
+      }];
+
+      store.load(type, models);
+      store.all(type).length.should.equal(6);
+
+      all = store.all(type);
+      all.map(obj => obj.id).should.deep.equal(['act', 'art', 'bad', 'biscuit', 'farm', 'sushi']);
+    });
+
     it('adding objects with collisions performs a merge', function () {
       var i, all;
       var models = [{
@@ -424,12 +457,34 @@ describe('DataStore', function () {
       retrieved.title.should.equal(models[1].title);
     });
 
+    it('adds multiple models when the DataStore is not empty and the id is a string type', function () {
+      var fill = {
+        id: 'act',
+        title: 'test title 1'
+      };
+      var models = [{
+        id: 'sushi',
+        title: 'test title 1'
+      }, {
+        id: 'farm',
+        title: 'test title 2'
+      }];
+
+      store.load(type, fill);
+      store.all(type).length.should.equal(1);
+
+      store.load(type, models);
+      store.all(type).length.should.equal(3);
+
+      store.all(type).map(obj => obj.id).should.deep.equal(['act', 'farm', 'sushi']);
+    });
+
     it('does nothing when adding an empty array', function () {
       store.load(type, []);
       store.all(type).length.should.equal(0);
     });
 
-    it('merges plain objects when asked', function () {
+    it('merges plain objects', function () {
       var retrieved;
       var fill = {
         id: 1,
@@ -438,6 +493,41 @@ describe('DataStore', function () {
       };
       var duplicate = {
         id: 1,
+        title: 'new title',
+        myAttr: 'new',
+        newAttr: 'i am new here!'
+      };
+
+      store.load(type, fill);
+      store.all(type).length.should.equal(1);
+
+      retrieved = store.all(type)[0];
+      expect(retrieved).to.exist;
+      retrieved.id.should.equal(fill.id);
+      retrieved.title.should.equal(fill.title);
+      retrieved.myAttr.should.equal(fill.myAttr);
+      expect(retrieved.newAttr).to.not.exist;
+
+      store.load(type, duplicate);
+      store.all(type).length.should.equal(1);
+
+      retrieved = store.all(type)[0];
+      expect(retrieved).to.exist;
+      retrieved.id.should.equal(duplicate.id);
+      retrieved.title.should.equal(duplicate.title);
+      retrieved.myAttr.should.equal(duplicate.myAttr);
+      retrieved.newAttr.should.equal(duplicate.newAttr);
+    });
+
+    it('merges plain objects when id is a string type', function () {
+      var retrieved;
+      var fill = {
+        id: 'sushi',
+        title: 'title 1',
+        myAttr: 'old'
+      };
+      var duplicate = {
+        id: 'sushi',
         title: 'new title',
         myAttr: 'new',
         newAttr: 'i am new here!'
@@ -566,6 +656,44 @@ describe('DataStore', function () {
 
       expect(store._getInsertIndex(newSort, 5, field)).to.equal(0);
       expect(store._getInsertIndex(newSort, 11, field)).to.equal(newSort.length);
+
+      // the value passed in must be of the same type as that held by the key searched
+      expect(store._getInsertIndex.bind(store, newSort, 'string', field)).to.throw(Error);
+    });
+
+    it('finds the rightmost index when the id is a string type', function () {
+      var i, rIndex;
+      var testIds = ['aardvark', 'add', 'ask', 'bard', 'cards', 'fresh', 'tortellini'];
+      var models = [{
+        id: 'act',
+      }, {
+        id: 'bad',
+      }, {
+        id: 'art',
+      }, {
+        id: 'biscuit',
+      }, {
+        id: 'sushi',
+      }, {
+        id: 'farm',
+      }];
+
+      store.load(type, models);
+      modelType.length.should.equal(models.length);
+
+      // preliminary checks before actual searching is done
+      expect(store._getInsertIndex.bind(store, modelType)).to.throw(Error);
+      expect(store._getInsertIndex([], 'stringId')).to.equal(0);
+
+      // searching by `id`
+      for (i = 0; i < testIds.length; ++i) {
+        rIndex = store._getInsertIndex(modelType, testIds[i]);
+        expect(rIndex).to.be.a('number');
+        expect(rIndex).to.equal(i);
+      }
+
+      // the value passed in must be of the same type as that held by the key searched
+      expect(store._getInsertIndex.bind(store, modelType, 1)).to.throw(Error);
     });
 
     it('correctly peforms binary search', function () {
@@ -625,9 +753,45 @@ describe('DataStore', function () {
       expect(store._binarySearch(newSort, 11, field)).to.not.exist;
     });
 
-    it('returns a single model using search criteria', function () {
-      var find;
-      var spy;
+    it('correctly performs binary search when the id is a string type', function () {
+      var i, bSearch, searchObjs;
+      var models = [{
+        id: 'act',
+      }, {
+        id: 'bad',
+      }, {
+        id: 'art',
+      }, {
+        id: 'biscuit',
+      }, {
+        id: 'sushi',
+      }, {
+        id: 'farm',
+      }];
+
+      searchObjs = models.slice();
+      searchObjs.sort((a, b) => a.id < b.id ? -1 : 1);
+
+      store.load(type, models);
+      modelType.length.should.equal(models.length);
+
+      // preliminary checks before actual searching is done
+      expect(store._binarySearch.bind(store, modelType)).to.throw(Error);
+      expect(store._binarySearch([], 'stringId')).to.not.exist;
+
+      // searching by `id`
+      for (i = 0; i < searchObjs.length; ++i) {
+        bSearch = store._binarySearch(modelType, searchObjs[i].id);
+        expect(bSearch).to.deep.equal(searchObjs[i]);
+        expect(bSearch).to.equal(modelType[i]);
+      }
+
+      // the value passed in must be of the same type as that held by the key searched
+      expect(store._binarySearch(modelType, 1)).to.not.exist;
+    });
+
+    it('finds a single model using search criteria', function () {
+      var i, find, spy;
       var models = [{
         id: 1,
         sort: 10
@@ -653,15 +817,17 @@ describe('DataStore', function () {
       spy = sinon.spy(store, '_binarySearch');
 
       // returns a model with a given id
-      find = store.find(type, models[0].id);
-      expect(find).to.exist;
-      expect(find.id).to.equal(models[0].id);
+      for (i = 0; i < models.length; ++i) {
+        find = store.find(type, models[i].id);
+        expect(find).to.exist;
+        expect(find.id).to.equal(models[i].id);
+      }
 
       // returns undefined when given a non-existent id
       find = store.find(type, 999);
       expect(find).to.not.exist;
 
-      spy.should.have.been.calledTwice;
+      spy.should.have.callCount(7);
       store._binarySearch.restore();
 
       // returns a model by a given key
@@ -675,12 +841,55 @@ describe('DataStore', function () {
       find = store.find(type, 'noExist', 999);
       expect(find).to.not.exist;
 
-      // returns undefined when given an id that doesn't convert to a number
+      // returns undefined when given an id that doesn't match the value held by the key `id`
       find = store.find(type, 'abcxyz');
+      expect(find).to.not.exist;
+
+      // returns undefined when given a value that doesn't match the value held by the key
+      find = store.find(type, 'abcxyz', 'sort');
       expect(find).to.not.exist;
     });
 
-    it('returns all models using search criteria', function () {
+    it('finds an object when the id is a string type', function () {
+      var i, find, spy;
+      var models = [{
+        id: 'act',
+      }, {
+        id: 'bad',
+      }, {
+        id: 'art',
+      }, {
+        id: 'biscuit',
+      }, {
+        id: 'sushi',
+      }, {
+        id: 'farm',
+      }];
+
+      store.load(type, models);
+
+      spy = sinon.spy(store, '_binarySearch');
+
+      // returns a model with a given id
+      for (i = 0; i < models.length; ++i) {
+        find = store.find(type, models[i].id);
+        expect(find).to.exist;
+        expect(find.id).to.equal(models[i].id);
+      }
+
+      // returns undefined when given a non-existent id
+      find = store.find(type, 'heyo');
+      expect(find).to.not.exist;
+
+      spy.should.have.callCount(7);
+      store._binarySearch.restore();
+
+      // returns undefined when given an id that doesn't match the value held by the key `id`
+      find = store.find(type, 1);
+      expect(find).to.not.exist;
+    });
+
+    it('gets all models matching search criteria', function () {
       var find;
       var models = [{
         id: 1,
@@ -708,7 +917,7 @@ describe('DataStore', function () {
 
       // returns the modelType itself
       find = store.all(type);
-      expect(find).to.deep.equal(modelType);
+      expect(find).to.deep.equal(models);
 
       // returns all models with a given id
       find = store.all(type, models[0].id);
@@ -725,15 +934,51 @@ describe('DataStore', function () {
       find = store.all(type, 'noExist', 999);
       expect(find).to.be.empty;
 
-      // returns an empty array when given an id that is a number
+      // returns an empty array when given an id that doesn't exist
       find = store.all(type, 1234);
       expect(find).to.be.empty;
-
-      // returns an empty array when given an id that converts to a number
       find = store.all(type, '1234');
       expect(find).to.be.empty;
+      find = store.all(type, 'abcxyz');
+      expect(find).to.be.empty;
+    });
 
-      // returns an empty array when given an id that doesn't convert to a number
+    it('finds all models when the id is a string type', function () {
+      var find, sortedModels;
+      var models = [{
+        id: 'act',
+      }, {
+        id: 'bad',
+      }, {
+        id: 'art',
+      }, {
+        id: 'biscuit',
+      }, {
+        id: 'sushi',
+      }, {
+        id: 'farm',
+      }];
+
+      store.load(type, models);
+
+      modelType.length.should.equal(models.length);
+
+      // returns the modelType itself
+      find = store.all(type);
+      sortedModels = models.slice();
+      sortedModels.sort((a, b) => a.id < b.id ? -1 : 1);
+      expect(find).to.deep.equal(sortedModels);
+
+      // returns all models with a given id
+      find = store.all(type, models[0].id);
+      expect(find).to.have.length(1);
+      expect(find[0].id).to.equal(models[0].id);
+
+      // returns an empty array when given an id that doesn't exist
+      find = store.all(type, 1234);
+      expect(find).to.be.empty;
+      find = store.all(type, '1234');
+      expect(find).to.be.empty;
       find = store.all(type, 'abcxyz');
       expect(find).to.be.empty;
     });
@@ -744,7 +989,7 @@ describe('DataStore', function () {
       store.clear();
     });
 
-    it('should delete models given', function () {
+    it('deletes the models given', function () {
       var splicedModels;
       var models = [{
         id: 1,
@@ -785,7 +1030,42 @@ describe('DataStore', function () {
       modelType.length.should.equal(models.length);
     });
 
-    it('should delete models that have a key equal to a certain value', function () {
+    it('deletes models when the id is a string type', function() {
+      var splicedModels;
+      var models = [{
+        id: 'act',
+      }, {
+        id: 'art',
+      }, {
+        id: 'bad',
+      }, {
+        id: 'biscuit',
+      }, {
+        id: 'farm',
+      }, {
+        id: 'sushi',
+      }];
+
+      store.load(type, models);
+      modelType.length.should.equal(models.length);
+      modelType.should.deep.equal(models);
+
+      // remove a single object
+      store.deleteModels(type, models[5]);
+      modelType.length.should.equal(models.length-1);
+      models.splice(5, 1);
+      modelType.should.deep.equal(models);
+      modelType.length.should.equal(models.length);
+
+      // remove multiple objects
+      splicedModels = models.splice(1, 3);
+      modelType.length.should.equal(models.length+3);
+      store.deleteModels(type, splicedModels);
+      modelType.should.deep.equal(models);
+      modelType.length.should.equal(models.length);
+    });
+
+    it('deletes models that have a key equal to a certain value', function () {
       var models = [{
         id: 1,
         extra: 1,
