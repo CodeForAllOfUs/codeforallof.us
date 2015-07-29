@@ -61,6 +61,16 @@ DataStore.prototype = {
   },
 
   /**
+  * Returns whether the datastore has that particular type name.
+  *
+  * @param {String} name Name of the type you're checking to see exists.
+  * @returns {Boolean} `true` if the type name exists in the datastore, `false` if not.
+  */
+  hasType: function (type) {
+    return !!this._store[type];
+  },
+
+  /**
   * Keeps a reference of the given model factory internally under the given named type. New models with that named type created from JSON or extended from an existing object-type will be created from this factory.
   *
   * @param {String} type A string name representing the model type and its factory type.
