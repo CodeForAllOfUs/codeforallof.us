@@ -108,7 +108,7 @@ gulp.task('js:app', ['js:clean:app'], function() {
             modules: 'amd',
             moduleIds: true,
             sourceRoot: __dirname + '/js',
-            moduleRoot: '',
+            moduleRoot: null,
             experimental: 2,
         }))
         .on('error', function (err) { console.error(err.toString()); this.emit('end'); })
