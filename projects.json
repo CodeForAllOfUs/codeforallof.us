@@ -1,51 +1,51 @@
 [
     {
         "organization": 1,
-        "name": "",
-        "homepage": "",
-        "description": "",
-        "tags": []
+        "name": "Comic Relief",
+        "homepage": "http://example.com/comic-relief",
+        "description": "A textbook that transforms into a comic book, relieving the reader of having to study all the time. Scientifically engineered to contain 2 laughs per panel.",
+        "tags": ["book", "literature", "reading", "learning", "fun", "laugh"]
     },
     {
         "organization": 2,
-        "name": "",
-        "homepage": "",
-        "description": "",
-        "tags": []
+        "name": "Weasel Watcher",
+        "homepage": "http://example.com/weasel-watcher",
+        "description": "Software-aided binoculars designed to mimic the look and the sounds of the majestic weasel. Makes it easier to observe them in their natural habitat undetected.",
+        "tags": ["vision", "audio", "wildlife", "majestic", "weasel"]
     },
     {
         "organization": 2,
-        "name": "",
-        "homepage": "",
-        "description": "",
-        "tags": []
+        "name": "I Am Weasel",
+        "homepage": "http://example.com/i-am-weasel",
+        "description": "Simulated weasel powered by Artificial Intelligence. Modeling how a weasel interacts in a simulated environment helps to understand how some environments may be preferable to others.",
+        "tags": ["ai", "artificial intelligence", "machine learning", "robot", "simulation"]
     },
     {
         "organization": 3,
-        "name": "",
-        "homepage": "",
-        "description": "",
-        "tags": []
+        "name": "AnTitanic",
+        "homepage": "http://example.org/antitanic",
+        "description": "Statistical modeling of the hulls of ships, with the intention of producing a ship unsinkable by icebergs. This research will fuel the expedition to the arctic, in our search for vast amounts of clean water.",
+        "tags": ["water", "ocean", "seafaring", "expedition", "statistic", "modeling", "simulation", "data"]
     },
     {
         "organization": 3,
-        "name": "",
-        "homepage": "",
-        "description": "",
-        "tags": []
+        "name": "Hydrotunnel",
+        "homepage": "http://example.org/hydrotunnel",
+        "description": "Research into how we can use water as an efficient means of transportation. Combining ideas from MagLev trains and windtunnel research, our aim is to prove that a series of tubes of water can serve in high-speed propulsion, as well as for the delivery of water.",
+        "tags": ["transport", "propulsion", "network", "modeling", "magnets", "superconductor", "logistics"]
     },
     {
         "organization": 3,
-        "name": "",
-        "homepage": "",
-        "description": "",
-        "tags": []
+        "name": "Heavy Bubble",
+        "homepage": "http://example.org/heavy-bubble",
+        "description": "Surveying how much water exists beneath the Arctic requires traveling deep beneath the surface of the ocean. Though most bubbles tend to travel in water from the depths to the surface, we're researching how to reverse this process.",
+        "tags": ["physics", "fluid dynamics", "expedtition", "survey", "chemistry", "chemical", "pneumatic"]
     },
     {
         "organization": null,
-        "name": "",
-        "homepage": "",
-        "description": "",
-        "tags": []
+        "name": "Clean Soap",
+        "homepage": "http://example.org/clean-soap",
+        "description": "It is estimated that more than one hundred people do not have access to clean soap. Our research aims at finding ways to take dirty soap and convert it into clean soap inexpensively.",
+        "tags": ["chemistry", "hygiene", "access", "resources", "energy", "economics"]
     }
 ]
