@@ -13,13 +13,13 @@ var filter = require('gulp-filter');
 
 // livereload and sync
 var browserSync = require('browser-sync').create();
-var reload = browserSync.reload;
 
 // dir vars
 var source = '.';
 var dest = 'public';
 var destStylesDir = dest + '/styles';
 var destScriptsDir = dest + '/scripts';
+var destJsonDir = dest + '/data';
 var destFontsDir = dest + '/fonts';
 var destImagesDir = dest + '/images';
 
@@ -36,6 +36,12 @@ var jsLibsGlob = [
     source + '/bower_components/bootstrap-sass/assets/javascripts/bootstrap.min.js',
 ];
 
+// json vars
+var jsonGlob = [
+    'organizations.json',
+    'projects.json',
+];
+
 // fonts vars
 var fontsGlob = [
     source + '/bower_components/bootstrap-sass/assets/fonts/**/*.*',
@@ -50,7 +56,7 @@ var sassGlob = sassDir + '/**/*.scss';
 
 // tasks
 // copy files
-gulp.task('copy', ['copy:fonts', 'copy:images', 'copy:html']);
+gulp.task('copy', ['copy:json', 'copy:fonts', 'copy:images', 'copy:html']);
 
 gulp.task('copy:fonts', function() {
     return gulp.src(fontsGlob)
@@ -65,6 +71,15 @@ gulp.task('copy:images', function() {
 gulp.task('copy:html', function() {
     return gulp.src('index.html')
         .pipe(gulp.dest(dest));
+});
+
+gulp.task('copy:json', ['clean:json'], function() {
+    return gulp.src(jsonGlob)
+        .pipe(gulp.dest(destJsonDir));
+});
+
+gulp.task('clean:json', function(cb) {
+    del(destJsonDir, cb);
 });
 
 gulp.task('js:clean', function(cb) {
