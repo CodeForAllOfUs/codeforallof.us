@@ -2,6 +2,9 @@ function ajax(obj) {
     return new Promise(function (resolve, reject) {
         var data;
         var xhr = new XMLHttpRequest();
+
+        obj.type = obj.type || 'GET';
+
         xhr.open(obj.type, obj.url, true);
 
         xhr.onreadystatechange = function() {
