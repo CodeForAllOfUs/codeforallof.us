@@ -22,5 +22,7 @@
     "white": true,
     "quotmark": "single",
     "globals": {
+        "document": true,
+        "window": true
     }
 }
