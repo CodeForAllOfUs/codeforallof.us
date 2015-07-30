@@ -139,6 +139,30 @@ gulp.task('sass', ['css:clean'], function() {
 });
 
 gulp.task('default', ['js:libs', 'js:app', 'sass', 'copy'], function() {
+    var events =  {};
+    function run(task) {
+        return function(event, file) {
+            var ev, timer;
+
+            if (!events[event]) {
+                events[event] = {};
+            }
+
+            ev = events[event];
+            timer = ev[file];
+
+            if (timer) {
+                clearTimeout(timer);
+            }
+
+            ev[file] = setTimeout(function () {
+                gulp.start(task, function() {
+                    delete ev[file];
+                });
+            }, 500);
+        };
+    }
+
     browserSync.init({
         logLevel: 'debug',
         online: false,
@@ -155,9 +179,10 @@ gulp.task('default', ['js:libs', 'js:app', 'sass', 'copy'], function() {
         },
     });
 
-    gulp.watch(jsLibsGlob, ['js:libs']);
-    gulp.watch(jsGlob, ['js:app']);
-    gulp.watch(sassGlob, ['sass']);
-    gulp.watch('index.html', ['copy:html']);
+    browserSync.watch(jsLibsGlob, run(['js:libs']));
+    browserSync.watch(jsGlob, run(['js:app']));
+    browserSync.watch(sassGlob, run(['sass']));
+    browserSync.watch(jsonGlob, run(['copy:json']));
+    browserSync.watch('index.html', run(['copy:html']));
     gulp.watch(dest + '/index.html').on('change', browserSync.reload);
 });
