@@ -1,4 +1,4 @@
-export function ListItem(ctx) {
+export function OrgListItem(ctx) {
     var listItem = document.createElement('div');
     var tpl =
     `
@@ -6,7 +6,8 @@ export function ListItem(ctx) {
         <p>${ctx.description}</p>
     `;
 
-    listItem.className = 'list-item';
+    listItem.setAttribute('id', ctx.id);
+    listItem.className = 'list-item org-list-item';
     listItem.innerHTML = tpl;
     return listItem;
 }
