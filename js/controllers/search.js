@@ -1,41 +1,68 @@
 import DataStore from 'classes/data-store';
 import SearchResult from 'classes/search-result';
 import Levenshtein from 'classes/levenshtein';
+import SearchView from 'views/search';
 import ListView from 'views/list';
-import { $$, listen } from 'utils/dom';
+import * as templates from 'templates';
 import ajax from 'utils/ajax';
 
 class SearchController {
     constructor(opts = {}) {
-        this.el = $$(opts.el)[0];
-        this.listView = new ListView({el: opts.listEl});
+        // models
+        this.lastSearch = '';
         this.store = new DataStore();
         this.searches = new DataStore();
-        this.lastSearch = '';
-        this.initStorage().then(() => {
+
+        // views
+        this.searchView = new SearchView({
+            el: opts.searchEl
+        });
+        this.orgListView = new ListView({
+            el: opts.orgListEl,
+            template: templates.OrgListItem,
+        });
+        this.projectListView = new ListView({
+            el: opts.projectListEl,
+            template: templates.ProjectListItem,
+        });
+    }
+
+    init() {
+        return this.initStorage().then(() => {
+            var store = this.store;
             this.initLevenshtein();
             this.initTextBox();
+            this.orgListView.render(store.all('org'));
+            this.projectListView.render(store.all('project'));
         });
     }
 
     initStorage() {
-        this.store.addType('orgs');
-        this.store.addType('projects');
-        this.searches.addType('searches');
-        this.searches.registerModelFactory('searches', SearchResult);
+        var store = this.store;
+        store.addType('org');
+        store.addType('project');
+        this.searches.addType('search');
+        this.searches.registerModelFactory('search', SearchResult);
+
+        function addProjects(projects) {
+            var id = 1;
+            projects.forEach(proj => {
+                proj.id = id++;
+
+                if (proj.organizationId) {
+                    proj.organization = store.find('org', proj.organizationId);
+                }
+
+                return proj;
+            });
+            store.load('project', projects);
+        }
 
         return ajax({url: '/data/organizations.json'})
             .then(orgs => {
-                this.store.load('orgs', orgs);
+                this.store.load('org', orgs);
                 return ajax({url: '/data/projects.json'});
-            }).then(projects => {
-                var id = 1;
-                projects.forEach(proj => {
-                    proj.id = id++;
-                    return proj;
-                });
-                this.store.load('projects', projects);
-            });
+            }).then(addProjects);
     }
 
     initLevenshtein() {
@@ -49,7 +76,7 @@ class SearchController {
     }
 
     initTextBox() {
-        listen(this.el, 'keyup', this.handleKeyup.bind(this));
+        this.searchView.on('keyup', this.handleKeyup.bind(this));
     }
 
     handleKeyup(evt) {
@@ -60,10 +87,6 @@ class SearchController {
         } else {
             // we're widening current results
         }
-
-        // placeholder
-        var models = this.store.all('orgs');
-        this.listView.render(models);
     }
 }
 

@@ -2,12 +2,14 @@ import SearchController from 'controllers/search';
 
 var App = {
     search: new SearchController({
-        el: '#search',
-        listEl: '#list-view',
+        searchEl: '#search',
+        orgListEl: '#org-list',
+        projectListEl: '#project-list',
     }),
 
     start() {
         console.log('App started!');
+        return this.search.init();
     }
 };
 
