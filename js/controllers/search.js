@@ -28,7 +28,7 @@ class SearchController {
                 return ajax({url: '/data/projects.json'});
             }).then(projects => {
                 var id = 1;
-                projects = projects.forEach(proj => {
+                projects.forEach(proj => {
                     proj.id = id++;
                     return proj;
                 });
