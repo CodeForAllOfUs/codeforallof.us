@@ -4,7 +4,7 @@ class SearchResult {
         this.projects = obj.projects;
     }
 
-    create(obj) {
+    static create(obj) {
         return this(obj);
     }
 }
