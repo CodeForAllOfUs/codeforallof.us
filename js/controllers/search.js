@@ -1,12 +1,14 @@
 import DataStore from 'classes/data-store';
 import SearchResult from 'classes/search-result';
 import Levenshtein from 'classes/levenshtein';
+import ListView from 'views/list';
 import { $$, listen } from 'utils/dom';
 import ajax from 'utils/ajax';
 
 class SearchController {
     constructor(opts = {}) {
         this.el = $$(opts.el)[0];
+        this.listView = new ListView({el: opts.listEl});
         this.store = new DataStore();
         this.searches = new DataStore();
         this.lastSearch = '';
@@ -58,6 +60,10 @@ class SearchController {
         } else {
             // we're widening current results
         }
+
+        // placeholder
+        var models = this.store.all('orgs');
+        this.listView.render(models);
     }
 }
 
