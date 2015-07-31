@@ -6,6 +6,10 @@ describe('Event Emitter', function() {
         e = new EventEmitter();
     });
 
+    it('does nothing when no callbacks are registered', function() {
+        expect(e.emit.bind(e, 'noExist')).to.not.throw();
+    });
+
     it('registers a callback under a name', function() {
         var fun1 = function() { return 1; };
         var fun2 = function() { return 2; };
