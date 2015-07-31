@@ -1,9 +1,11 @@
-import * as templates from 'templates';
 import { $$, listen } from 'utils/dom';
+import EventEmitter from 'classes/event-emitter';
 
-class ListView {
-    constructor(obj) {
-        this.el = $$(obj.el)[0];
+class ListView extends EventEmitter {
+    constructor(opts = {}) {
+        super();
+        this.el = $$(opts.el)[0];
+        this.template = opts.template;
     }
 
     render(models) {
@@ -13,7 +15,7 @@ class ListView {
         el.innerHTML = '';
 
         for (i = 0; i < models.length; ++i) {
-            el.appendChild(templates.ListItem(models[i]));
+            el.appendChild(this.template(models[i]));
         }
     }
 }
