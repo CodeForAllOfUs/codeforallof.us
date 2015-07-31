@@ -71,6 +71,15 @@ DataStore.prototype = {
     },
 
     /**
+    * Returns the names of all the types the DataStore currently holds.
+    *
+    * @returns {Boolean} `true` if the type name exists in the datastore, `false` if not.
+    */
+    allTypes: function () {
+        return Object.keys(this._store);
+    },
+
+    /**
     * Keeps a reference of the given model factory internally under the given named type. New models with that named type created from JSON or extended from an existing object-type will be created from this factory.
     *
     * @param {String} type A string name representing the model type and its factory type.
@@ -79,15 +88,15 @@ DataStore.prototype = {
     */
     registerModelFactory: function (type, factory) {
         if (this._store[type] === void 0) {
-            throw new Error('There is no model type ' + type + ' in the datastore!');
+            throw new Error('There is no model type "' + type + '" in the datastore!');
         }
 
         if (this._factories[type] !== void 0) {
-            throw new Error ('There is already a registered model factory of type ' + type + ' in the datastore!');
+            throw new Error ('There is already a registered model factory of type "' + type + '" in the datastore!');
         }
 
         if (typeof factory !== 'function' || typeof factory.create !== 'function') {
-            throw new Error ('The model factory of type ' + type + 'you are trying to register is not of the proper datatype!');
+            throw new Error ('The model factory of type "' + type + '" you are trying to register is not of the proper datatype!');
         }
 
         this._factories[type] = factory;
@@ -271,7 +280,7 @@ DataStore.prototype = {
     * @param {Array} sortedArray An array that has already been sorted by `key`.
     * @param {(String|Number|Date)} value The value to compare against the objects' `key`s. Anything that can be compared with `<`.
     * @param {String} [key=id] The key to search objects by within sortedArray. Defaults to 'id'.
-    * @return {Object} The found object or `undefined`.
+    * @return {(Object|undefined)} The found object or `undefined`.
     */
     _binarySearch: function (sortedArray, value, key) {
         var ret = this._binarySearchIndex(sortedArray, value, key);
@@ -422,7 +431,7 @@ DataStore.prototype = {
     * @param {String} type The name of the modelType you wish to search through.
     * @param {String} [key=id] Optional key to search modelType. Defaults to `id` if not given.
     * @param {(Number|String|Date)} val The value you're looking for in `key`.
-    * @return {(Object|undefined)} The object or undefined if it wasn't found.
+    * @return {(Object|Undefined)} The object or undefined if it wasn't found.
     */
     find: function (type, key, val) {
         var modelType = this._store[type];

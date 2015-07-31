@@ -206,6 +206,21 @@ describe('DataStore', function () {
             store.all(type).should.exist;
         });
 
+        it('knows if it has a type', function () {
+            var newType = 'testType3';
+            store.addType(newType);
+            store.hasType(type).should.be.ok;
+            store.hasType(newType).should.be.ok;
+        });
+
+        it('returns the names of all types', function () {
+            store.allTypes().should.deep.equal([
+                'testType',
+                'testType2',
+                'testType3',
+            ]);
+        });
+
         it('fails to get a non-existent type', function () {
             expect(store.all.bind(store, 'noExist')).to.throw(Error);
         });
