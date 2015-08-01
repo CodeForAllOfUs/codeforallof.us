@@ -11,7 +11,6 @@ class SearchController {
         // models
         this.lastSearch = '';
         this.store = new DataStore();
-        this.searches = new DataStore();
 
         // views
         this.searchView = new SearchView({
@@ -41,8 +40,13 @@ class SearchController {
         var store = this.store;
         store.addType('org');
         store.addType('project');
-        this.searches.addType('search');
-        this.searches.registerModelFactory('search', SearchResult);
+        store.addType('search');
+        store.registerModelFactory('search', SearchResult);
+
+        function addOrgs(orgs) {
+            store.load('org', orgs);
+            return ajax({url: '/data/projects.json'});
+        }
 
         function addProjects(projects) {
             var id = 1;
@@ -59,10 +63,16 @@ class SearchController {
         }
 
         return ajax({url: '/data/organizations.json'})
-            .then(orgs => {
-                this.store.load('org', orgs);
-                return ajax({url: '/data/projects.json'});
-            }).then(addProjects);
+            .then(addOrgs)
+            .then(addProjects)
+            .then(() => {
+                store.load('search', {
+                    // initialize search results for empty search text box
+                    id: '',
+                    org: store.all('org'),
+                    project: store.all('project'),
+                });
+            });
     }
 
     initLevenshtein() {
@@ -81,12 +91,54 @@ class SearchController {
 
     handleKeyup(evt) {
         var value = evt.target.value;
+        var lastSearch = this.lastSearch;
+        var store = this.store;
+        var model;
 
-        if (this.lastSearch.length < value.length) {
-            // we're filtering current results
-        } else {
-            // we're widening current results
+        // if search has been previously cached in the database, use it
+        model = store.find('search', value);
+
+        if (!model) {
+            if (lastSearch.length < value.length) {
+                // we're filtering current results, use last results
+                model = store.find('search', lastSearch);
+            } else {
+                // we're widening current results, start from scratch
+                model = store.find('search', '');
+            }
+
+            // perform string approximation on models' attributes
+            model = this.approximate(model, value);
+            // store the search results back into the store
+            store.load('search', model);
         }
+
+        // apply user-supplied filters to the search results
+        model = this.applyFilters(model);
+
+        this.lastSearch = value;
+        this.orgListView.render(model.org);
+        this.projectListView.render(model.project);
+    }
+
+    approximate(model, searchString) {
+        var ret = {};
+
+        // model id is the value of the search itself
+        // so that the data store can be queried easily
+        ret.id = searchString;
+
+        ret.org = model.org.slice(1);
+        ret.project = model.project.slice(1);
+
+        return ret;
+    }
+
+    applyFilters(model) {
+        var ret = {};
+        ret.org = model.org;
+        ret.project = model.project;
+        return ret;
     }
 }
 
