@@ -1,11 +1,12 @@
 class SearchResult {
     constructor(obj) {
-        this.orgs = obj.orgs;
-        this.projects = obj.projects;
+        this.id = obj.id;
+        this.org = obj.org;
+        this.project = obj.project;
     }
 
     static create(obj) {
-        return this(obj);
+        return new this(obj);
     }
 }
 
