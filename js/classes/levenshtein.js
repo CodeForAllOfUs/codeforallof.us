@@ -18,12 +18,15 @@ class Levenshtein {
     _initFirstRowWhole() {
         var m = this.m;
         var len = m[0].length;
+        var s1 = this._s1;
         var s2 = this._s2;
+        var cBefore = null;
+        var cAfter = s1[1];
         var j;
 
         for (j = 0; j < len; ++j) {
             if (j > 0) {
-                m[0][j].cost = m[0][j-1].cost + this.insertCost(s2[j]);
+                m[0][j].cost = m[0][j-1].cost + this.insertCost(s2[j], cBefore, cAfter);
                 m[0][j].parent = INSERT;
             } else {
                 m[0][j].cost = 0;
@@ -166,12 +169,22 @@ class Levenshtein {
         var s1 = this._s1;
         var s2 = this._s2;
         var m = this.m;
+        var len1 = s1.length;
+        var len2 = s2.length;
         var i, j, k;
+        var cBefore, cAfter;
 
-        for (i = 1; i < s1.length; ++i) {
-            for (j = 1; j < s2.length; ++j) {
+        for (i = 1; i < len1; ++i) {
+            for (j = 1; j < len2; ++j) {
+                cBefore = s1[i];
+                if (i === len1-1) {
+                    cAfter = null;
+                } else {
+                    cAfter = s1[i+1];
+                }
+
                 opt[MATCH]  = m[i-1][j-1].cost + this.matchCost(s1[i], s2[j]);
-                opt[INSERT] = m[i][j-1].cost + this.insertCost(s2[j]);
+                opt[INSERT] = m[i][j-1].cost + this.insertCost(s2[j], cBefore, cAfter);
                 opt[DELETE] = m[i-1][j].cost + this.deleteCost(s1[i]);
 
                 m[i][j].cost = opt[MATCH];
@@ -301,7 +314,7 @@ class Levenshtein {
         if (this.s1.length === 0) {
             return this.s2
                     .split('')
-                    .reduce((p, c) => p + this.insertCost(c), 0);
+                    .reduce((p, c) => p + this.insertCost(c, null, null), 0);
         } else if (this.s2.length === 0) {
             return this.s1
                     .split('')
@@ -322,9 +335,14 @@ class Levenshtein {
         return 1;
     }
 
-    // override with .set('insertCost', fn) to provide a different cost for insertion
-    // receives character to be inserted
-    insertCost(c) {
+    /**
+    * User-overridable function that returns the cost of any particular insertion. Override with `.set('insertCost', fn)` before searching to provide a different cost function.
+    * @param {String} c The character to be inserted from the text into the search pattern that would help transform the pattern into the text.
+    * @param {(String|null)} cBefore The character in the search pattern immediately to the left of the cursor position of the insertion. `null` if the cursor position is at the beginning of the search pattern.
+    * @param {(String|null)} cAfter The character in the search pattern immediately to the right of the cursor position of the insertion. `null` if the cursor position is at the end of the search pattern.
+    * @return {Number} The cost of insertion.
+    */
+    insertCost(c, cBefore, cAfter) {
         return 1;
     }
 

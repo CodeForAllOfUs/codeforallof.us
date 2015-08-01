@@ -88,6 +88,76 @@ describe('Levenshtein', function() {
                 l.totalCost().should.equal(100);
             });
 
+            it('respects insert function when all arguments are used', function () {
+                var insertions;
+                var l = new Levenshtein({
+                    // type: 'substring',
+                    caseSensitive: false,
+                });
+
+                l.set('matchCost', function(c1, c2) {
+                    if (c1 === c2) {
+                        return 0;
+                    }
+
+                    // don't substitute a space char; keeps search words separate
+                    if (c1 === ' ') {
+                        return Infinity;
+                    }
+
+                    return 1;
+                });
+
+                l.set('insertCost', function(c, cBefore, cAfter) {
+                    if (cBefore === null || cAfter === null || cBefore === ' ' || cAfter === ' ') {
+                        return 0;
+                    }
+                    // prefer insertions inside of a word to a substitution
+                    return 0.9;
+                });
+
+                l.set('deleteCost', Infinity);
+
+                l.process('h is nl a tst', 'this is only a test');
+                l.totalCost().should.equal(0.9);
+
+                insertions = 0;
+                l.recursePath(function(node) {
+                    if (node.op === 'I') {
+                        insertions++;
+                        if (node.letter === 'e') {
+                            node.i.should.equal(11);
+                        }
+                    }
+                });
+                insertions.should.equal(6);
+
+                // test that substitution happens
+                l.set('insertCost', function(c, cBefore, cAfter) {
+                    if (cBefore === null || cAfter === null || cBefore === ' ' || cAfter === ' ') {
+                        return 0;
+                    }
+                    // prefer a substitution to an insertion inside a word
+                    return 1.1;
+                });
+
+                l.process('h is nl a ts', 'this is only in test');
+                l.totalCost().should.equal(2);
+
+                insertions = 0;
+                l.recursePath(function(node) {
+                    if (node.op === 'I') {
+                        insertions++;
+                    }
+                    if (node.op === 'S') {
+                        ['a', 't'].indexOf(node.from).should.not.equal(-1);
+                        ['n', 'e'].indexOf(node.to).should.not.equal(-1);
+                        [ 8,   10].indexOf(node.i).should.not.equal(-1);
+                    }
+                });
+                insertions.should.equal(8);
+            });
+
             it('respects delete function', function () {
                 var l = new Levenshtein({
                 });
