@@ -99,11 +99,12 @@ class SearchController {
         model = store.find('search', value);
 
         if (!model) {
-            if (lastSearch.length < value.length) {
-                // we're filtering current results, use last results
+            // if only inserts and matches are used to transform the lastSearch...
+            if (this.lev.process(lastSearch, value).totalCost() === 0) {
+                // we're filtering the last results further
                 model = store.find('search', lastSearch);
             } else {
-                // we're widening current results, start from scratch
+                // we're widening the last results, start from scratch
                 model = store.find('search', '');
             }
 
@@ -113,8 +114,9 @@ class SearchController {
             store.load('search', model);
         }
 
-        // apply user-supplied filters to the search results
+        // apply user-supplied filters and sorts to the search results
         model = this.applyFilters(model);
+        model = this.applySorts(model);
 
         this.lastSearch = value;
         this.orgListView.render(model.org);
@@ -122,7 +124,10 @@ class SearchController {
     }
 
     approximate(model, searchString) {
-        var ret = {};
+        var ret = {
+            org: [],
+            project: [],
+        };
 
         // model id is the value of the search itself
         // so that the data store can be queried easily
@@ -136,8 +141,15 @@ class SearchController {
 
     applyFilters(model) {
         var ret = {};
-        ret.org = model.org;
-        ret.project = model.project;
+        ret.org = model.org.slice();
+        ret.project = model.project.slice();
+        return ret;
+    }
+
+    applySorts(model) {
+        var ret = {};
+        ret.org = model.org.slice();
+        ret.project = model.project.slice();
         return ret;
     }
 }
