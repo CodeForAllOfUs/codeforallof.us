@@ -80,9 +80,33 @@ class SearchController {
             type: 'substring',
             caseSensitive: false
         };
-        this.lev = new Levenshtein(levOpts);
-        this.lev.set('insertCost', 0);
-        this.lev.set('deleteCost', Infinity);
+        var queryLev = this.queryLev = new Levenshtein(levOpts);
+        var searchLev = this.searchLev = new Levenshtein(levOpts);
+
+        queryLev.set('insertCost', 0);
+        queryLev.set('deleteCost', Infinity);
+
+        searchLev.set('matchCost', (c1, c2) => {
+            if (c1 === c2) {
+                return 0;
+            }
+
+            // don't substitute a space char; keeps search words separate
+            if (c1 === ' ') {
+                return Infinity;
+            }
+
+            return 1;
+        });
+        searchLev.set('insertCost', function(c, cBefore, cAfter) {
+            // insertion at a word boundary is free
+            if (cBefore === null || cAfter === null || cBefore === ' ' || cAfter === ' ') {
+                return 0;
+            }
+            // prefer insertions inside of a word to a substitution
+            return 0.9;
+        });
+        searchLev.set('deleteCost', 1);
     }
 
     initTextBox() {
@@ -100,7 +124,7 @@ class SearchController {
 
         if (!model) {
             // if only inserts and matches are used to transform the lastSearch...
-            if (this.lev.process(lastSearch, value).totalCost() === 0) {
+            if (this.queryLev.process(lastSearch, value).totalCost() === 0) {
                 // we're filtering the last results further
                 model = store.find('search', lastSearch);
             } else {
@@ -124,17 +148,62 @@ class SearchController {
     }
 
     approximate(model, searchString) {
-        var ret = {
-            org: [],
-            project: [],
-        };
+        function filterMatches(obj) {
+            var len = searchString.length;
+            var i, strings, matchString;
+            var matches;
+            var deletions;
+
+            strings = props.reduce((mem, prop) => {
+                var val = obj[prop];
+
+                if (typeof val === 'string') {
+                    mem.push(val);
+                } else if (Array.isArray(val)) {
+                    mem = mem.concat(val);
+                }
+
+                return mem;
+            }, []);
+
+            for (i = 0; i < strings.length; ++i) {
+                matchString = strings[i];
+                matches = 0;
+                deletions = 0;
+
+                lev.process(searchString, matchString);
+                lev.recursePath(node => {
+                    if (node.op === 'M') {
+                        matches++;
+                    }
+                    if (node.op === 'D') {
+                        deletions++;
+                    }
+                });
+
+                if (matches/len >= threshold && lev.totalCost() <= 3 && deletions <= 3) {
+                    return true;
+                }
+            }
+        }
+
+        var ret = {};
+        var lev = this.searchLev;
+        var props = ['name', 'description', 'categories', 'tags'];
+        var threshold;
+
+        // more forgiving thresholds for small-length searches
+        if (searchString.length < 10) {
+            threshold = 0.5;
+        } else {
+            threshold = 0.8;
+        }
 
         // model id is the value of the search itself
         // so that the data store can be queried easily
         ret.id = searchString;
-
-        ret.org = model.org.slice(1);
-        ret.project = model.project.slice(1);
+        ret.org = model.org.filter(filterMatches);
+        ret.project = model.project.filter(filterMatches);
 
         return ret;
     }
