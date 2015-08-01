@@ -1,0 +1,7 @@
+.empty-list-msg {
+    display: none;
+}
+
+.list-view:empty + .empty-list-msg {
+    display: block;
+}
