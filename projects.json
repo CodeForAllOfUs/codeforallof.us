@@ -39,7 +39,7 @@
         "name": "Heavy Bubble",
         "homepage": "http://example.org/heavy-bubble",
         "description": "Surveying how much water exists beneath the Arctic requires traveling deep beneath the surface of the ocean. Though most bubbles tend to travel in water from the depths to the surface, we're researching how to reverse this process.",
-        "tags": ["physics", "fluid dynamics", "expedtition", "survey", "chemistry", "chemical", "pneumatic"]
+        "tags": ["physics", "fluid dynamics", "expedition", "survey", "chemistry", "chemical", "pneumatic"]
     },
     {
         "organizationId": null,
