@@ -5,6 +5,7 @@ import SearchView from 'views/search';
 import ListView from 'views/list';
 import * as templates from 'templates';
 import ajax from 'utils/ajax';
+import shuffle from 'utils/shuffle';
 
 class SearchController {
     constructor(opts = {}) {
@@ -42,43 +43,43 @@ class SearchController {
     }
 
     initStorage() {
-        function addOrgs(orgs) {
-            store.load('org', orgs);
-            return ajax({url: '/data/projects.json'});
-        }
-
-        function addProjects(projects) {
-            var id = 1;
-            projects.forEach(proj => {
-                proj.id = id++;
-
-                if (proj.organizationId) {
-                    proj.organization = store.find('org', proj.organizationId);
-                }
-
-                return proj;
-            });
-            store.load('project', projects);
-        }
-
         var store = this.store;
         store.addType('org');
         store.addType('project');
         store.addType('search');
         store.registerModelFactory('search', SearchResult);
 
-        return ajax({url: '/data/organizations.json'})
-            .then(addOrgs)
-            .then(addProjects)
-            .then(() => {
-                store.load('search', {
-                    // initialize search results for empty search text box
-                    id: '',
-                    org: store.all('org'),
-                    project: store.all('project'),
-                });
-                this.currentSearchResults = store.find('search', '');
+        return Promise.all([
+            ajax({url: '/data/organizations.json'}),
+            ajax({url: '/data/projects.json'}),
+        ]).then(([orgs, projects]) => {
+            // shuffle all orgs and projects to
+            // give each a fair chance at being seen
+            var id = 1;
+            shuffle(projects);
+            projects.forEach(proj => {
+                proj.id = id++;
+                if (proj.organizationId) {
+                    proj.organization = orgs[proj.organizationId-1];
+                    delete proj.organizationId;
+                }
             });
+
+            id = 1;
+            shuffle(orgs);
+            orgs.forEach(org => org.id = id++);
+
+            store.load('org', orgs);
+            store.load('project', projects);
+            store.load('search', {
+                // initialize search results for empty search text box
+                id: '',
+                org: store.all('org'),
+                project: store.all('project'),
+            });
+
+            this.currentSearchResults = store.find('search', '');
+        });
     }
 
     initLevenshtein() {
