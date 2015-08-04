@@ -2,6 +2,7 @@ import DataStore from 'classes/data-store';
 import SearchResult from 'classes/search-result';
 import Levenshtein from 'classes/levenshtein';
 import SearchView from 'views/search';
+import FilterView from 'views/filter';
 import ListView from 'views/list';
 import * as templates from 'templates';
 import ajax from 'utils/ajax';
@@ -21,7 +22,10 @@ class SearchController {
 
         // views
         this.searchView = new SearchView({
-            el: opts.searchEl
+            el: opts.searchEl,
+        });
+        this.filterView = new FilterView({
+            el: opts.filterEl,
         });
         this.orgListView = new ListView({
             el: opts.orgListEl,
@@ -56,6 +60,9 @@ class SearchController {
             // shuffle all orgs and projects to
             // give each a fair chance at being seen
             var id = 1;
+            // build list of filters for user to use
+            var categories = [];
+
             shuffle(projects);
             projects.forEach(proj => {
                 proj.id = id++;
@@ -67,7 +74,14 @@ class SearchController {
 
             id = 1;
             shuffle(orgs);
-            orgs.forEach(org => org.id = id++);
+            orgs.forEach(org => {
+                var currCategories = org.categories;
+                var i;
+                org.id = id++;
+                for (i = 0; i < currCategories.length; ++i) {
+                    categories.push(currCategories[i]);
+                }
+            });
 
             store.load('org', orgs);
             store.load('project', projects);
@@ -79,6 +93,7 @@ class SearchController {
             });
 
             this.currentSearchResults = store.find('search', '');
+            this.filterView.render(categories);
         });
     }
 
