@@ -14,9 +14,13 @@ class FilterView extends EventEmitter {
     init() {
         listen(this.el, 'click', evt => {
             var target = evt.target;
-            if (target.getAttribute('type').toLowerCase() === 'checkbox') {
-                this.emit('filter', target.value, target.getAttribute('checked'));
+            if (target.nodeName.toLowerCase() !== 'input' ||
+                target.getAttribute('type').toLowerCase() !== 'checkbox')
+            {
+                return;
             }
+
+            this.emit('updateCategoryFilters', target.value, target.checked);
         });
     }
 
@@ -24,7 +28,7 @@ class FilterView extends EventEmitter {
         var el = this.el;
         var i;
         for (i = 0; i < filters.length; ++i) {
-            el.appendChild(this.template(filters[i]));
+            el.appendChild(this.template(filters[i].id));
         }
     }
 }

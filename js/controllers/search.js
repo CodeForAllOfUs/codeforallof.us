@@ -7,6 +7,7 @@ import ListView from 'views/list';
 import * as templates from 'templates';
 import ajax from 'utils/ajax';
 import shuffle from 'utils/shuffle';
+import binarySearch from 'utils/binary-search';
 
 class SearchController {
     constructor(opts = {}) {
@@ -16,6 +17,8 @@ class SearchController {
         this.currentSearchResults = null;
         // amount of models to render on infinite scroll trigger
         this.chunkSize = 1;
+        // holds the filters the user selected for the search results
+        this.filters = {};
 
         // models
         this.store = new DataStore();
@@ -40,8 +43,8 @@ class SearchController {
     init() {
         return this.initStorage().then(() => {
             this.initLevenshtein();
-            this.initTextBox();
-            this.initLists();
+            this.filterView.render(this.store.all('category'));
+            this.addListeners();
             this.renderSearch('');
         });
     }
@@ -50,6 +53,7 @@ class SearchController {
         var store = this.store;
         store.addType('org');
         store.addType('project');
+        store.addType('category');
         store.addType('search');
         store.registerModelFactory('search', SearchResult);
 
@@ -79,12 +83,13 @@ class SearchController {
                 var i;
                 org.id = id++;
                 for (i = 0; i < currCategories.length; ++i) {
-                    categories.push(currCategories[i]);
+                    categories.push({id: currCategories[i]});
                 }
             });
 
             store.load('org', orgs);
             store.load('project', projects);
+            store.load('category', categories);
             store.load('search', {
                 // initialize search results for empty search text box
                 id: '',
@@ -92,8 +97,8 @@ class SearchController {
                 project: store.all('project'),
             });
 
+            this.filters.categories = store.all('category').map(cat => cat.id);
             this.currentSearchResults = store.find('search', '');
-            this.filterView.render(categories);
         });
     }
 
@@ -135,14 +140,36 @@ class SearchController {
         searchLev.set('deleteCost', 1);
     }
 
-    initTextBox() {
-        this.searchView.on('keyup', this.handleKeyup.bind(this));
-    }
-
-    initLists() {
+    addListeners() {
         var sendNextChunk = this.sendNextChunk.bind(this);
+        this.searchView.on('keyup', this.handleKeyup.bind(this));
+        this.filterView.on('updateCategoryFilters', this.updateCategoryFilters.bind(this));
         this.orgListView.on('requestNextChunk', sendNextChunk);
         this.projectListView.on('requestNextChunk', sendNextChunk);
+    }
+
+    updateCategoryFilters(name, enable) {
+        var lastSearch = this.lastSearch;
+        var idx = this.filters.categories.indexOf(name);
+        var exists = idx !== -1;
+
+        if (enable && !exists) {
+            this.filters.categories.push(name);
+            this.filters.categories.sort();
+        }
+
+        if (!enable && exists) {
+            this.filters.categories.splice(idx, 1);
+        }
+
+        // simulate API fetching
+        setTimeout(() => {
+            // if the search text has been changed since we added these filters,
+            // let the normal keyboard event handling events handle the render
+            if (this.lastSearch === lastSearch) {
+                this.renderSearch(lastSearch);
+            }
+        }, 500);
     }
 
     sendNextChunk(list, startIndex) {
@@ -184,7 +211,7 @@ class SearchController {
             // perform string approximation on models' attributes
             // and store the search results back into the store
             store.load('search', this.approximate(model, searchValue));
-            model = store.all('search', searchValue);
+            model = store.find('search', searchValue);
         }
 
         // apply user-supplied filters and sorts to the search results
@@ -260,7 +287,16 @@ class SearchController {
 
     applyFilters(model) {
         var ret = {};
-        ret.org = model.org.slice();
+        var categoryFilters = this.filters.categories;
+        ret.org = model.org.filter(org => {
+            var len = org.categories.length;
+            var i;
+            for (i = 0; i < len; ++i) {
+                if (binarySearch(categoryFilters, org.categories[i]) !== -1) {
+                    return true;
+                }
+            }
+        });
         ret.project = model.project.slice();
         return ret;
     }
