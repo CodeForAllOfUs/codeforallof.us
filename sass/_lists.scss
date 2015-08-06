@@ -3,6 +3,6 @@
     color: red;
 }
 
-.list-view:empty + .empty-list-msg {
+.list:empty + .empty-list-msg {
     display: block;
 }

@@ -1,9 +1,9 @@
 import DataStore from 'classes/data-store';
 import SearchResult from 'classes/search-result';
 import Levenshtein from 'classes/levenshtein';
+import ListController from 'controllers/list';
 import SearchView from 'views/search';
 import FilterView from 'views/filter';
-import ListView from 'views/list';
 import * as templates from 'templates';
 import ajax from 'utils/ajax';
 import shuffle from 'utils/shuffle';
@@ -13,8 +13,6 @@ class SearchController {
     constructor(opts = {}) {
         // local data
         this.lastSearch = '';
-        // hold the current search results to render out chunks at a time
-        this.currentSearchResults = null;
         // amount of models to render on infinite scroll trigger
         this.chunkSize = 1;
         // holds the filters the user selected for the search results
@@ -30,13 +28,17 @@ class SearchController {
         this.filterView = new FilterView({
             el: opts.filterEl,
         });
-        this.orgListView = new ListView({
-            el: opts.orgListEl,
-            template: templates.OrgListItem,
+
+        // sub-controllers
+        this.orgListController = new ListController({
+            el: opts.orgEl,
+            listTemplate: templates.OrgListItem,
+            chunkSize: this.chunkSize,
         });
-        this.projectListView = new ListView({
-            el: opts.projectListEl,
-            template: templates.ProjectListItem,
+        this.projectListController = new ListController({
+            el: opts.projectEl,
+            listTemplate: templates.ProjectListItem,
+            chunkSize: this.chunkSize,
         });
     }
 
@@ -98,7 +100,6 @@ class SearchController {
             });
 
             this.filters.categories = store.all('category').map(cat => cat.id);
-            this.currentSearchResults = store.find('search', '');
         });
     }
 
@@ -141,11 +142,8 @@ class SearchController {
     }
 
     addListeners() {
-        var sendNextChunk = this.sendNextChunk.bind(this);
         this.searchView.on('keyup', this.handleKeyup.bind(this));
         this.filterView.on('updateCategoryFilters', this.updateCategoryFilters.bind(this));
-        this.orgListView.on('requestNextChunk', sendNextChunk);
-        this.projectListView.on('requestNextChunk', sendNextChunk);
     }
 
     updateCategoryFilters(name, enable) {
@@ -170,20 +168,6 @@ class SearchController {
                 this.renderSearch(lastSearch);
             }
         }, 500);
-    }
-
-    sendNextChunk(list, startIndex) {
-        var dataset;
-
-        if (list === this.orgListView) {
-            dataset = this.currentSearchResults.org;
-        } else if (list === this.projectListView) {
-            dataset = this.currentSearchResults.project;
-        } else {
-            throw new Error('Tried to access non-existent model type from the current search results dataset.');
-        }
-
-        list.receiveNextChunk(dataset.slice(startIndex, startIndex + this.chunkSize));
     }
 
     handleKeyup(evt) {
@@ -219,9 +203,8 @@ class SearchController {
         model = this.applySorts(model);
 
         this.lastSearch = searchValue;
-        this.currentSearchResults = model;
-        this.orgListView.render(model.org.slice(0, this.chunkSize));
-        this.projectListView.render(model.project.slice(0, this.chunkSize));
+        this.orgListController.render(model.org);
+        this.projectListController.render(model.project);
     }
 
     approximate(model, searchString) {

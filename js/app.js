@@ -4,8 +4,8 @@ var App = {
     search: new SearchController({
         searchEl: '#search',
         filterEl: '#filters',
-        orgListEl: '#org-list',
-        projectListEl: '#project-list',
+        orgEl: '#organizations',
+        projectEl: '#projects',
     }),
 
     start() {

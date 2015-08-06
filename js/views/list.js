@@ -15,7 +15,7 @@ class ListView extends EventEmitter {
     init() {
         listen(document.body, 'click', () => {
             if (!this.listCompleted) {
-                this.emit('requestNextChunk', this, this.el.children.length);
+                this.emit('requestNextChunk', this.el.children.length);
             }
         });
     }
