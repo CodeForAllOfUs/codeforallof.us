@@ -16,12 +16,30 @@
         <div id="results">
             <div id="organizations">
                 <h1>Organizations</h1>
-                <div class="list"></div>
+                <table id="list-table">
+                    <thead class="sort-header">
+                        <tr>
+                            <td class="sort-key" data-sort-key="id">ID</td>
+                            <td class="sort-key" data-sort-key="name">Name</td>
+                        </tr>
+                    </thead>
+                    <tbody class="list"></tbody>
+                </table>
                 <div class="empty-list-msg">There were no organizations that matched your search.</div>
             </div>
+
             <div id="projects">
                 <h1>Projects</h1>
-                <div class="list"></div>
+                <table class="list-table">
+                    <thead class="sort-header">
+                        <tr>
+                            <td class="sort-key" data-sort-key="id">ID</td>
+                            <td class="sort-key" data-sort-key="organizationId">Org</td>
+                            <td class="sort-key" data-sort-key="name">Name</td>
+                        </tr>
+                    </thead>
+                    <tbody class="list"></tbody>
+                </table>
                 <div class="empty-list-msg">There were no projects that matched your search.</div>
             </div>
         </div>

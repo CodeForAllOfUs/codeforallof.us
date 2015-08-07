@@ -5,7 +5,6 @@ import { $$, listen } from 'utils/dom';
 class ListController extends EventEmitter {
     constructor(opts = {}) {
         super();
-
         this.el = $$(opts.el)[0];
         this.chunkSize = opts.chunkSize || 1;
         // hold the results to render out chunks at a time

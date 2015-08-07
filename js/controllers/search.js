@@ -74,7 +74,6 @@ class SearchController {
                 proj.id = id++;
                 if (proj.organizationId) {
                     proj.organization = orgs[proj.organizationId-1];
-                    delete proj.organizationId;
                 }
             });
 
