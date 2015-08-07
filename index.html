@@ -16,10 +16,10 @@
         <div id="results">
             <div id="organizations">
                 <h1>Organizations</h1>
-                <table id="list-table">
+                <button class="remove-sort" data-sort-key="id">Remove Sorting</button>
+                <table class="list-table">
                     <thead class="sort-header">
                         <tr>
-                            <td class="sort-key" data-sort-key="id">ID</td>
                             <td class="sort-key" data-sort-key="name">Name</td>
                         </tr>
                     </thead>
@@ -30,11 +30,11 @@
 
             <div id="projects">
                 <h1>Projects</h1>
+                <button class="remove-sort" data-sort-key="id">Remove Sorting</button>
                 <table class="list-table">
                     <thead class="sort-header">
                         <tr>
-                            <td class="sort-key" data-sort-key="id">ID</td>
-                            <td class="sort-key" data-sort-key="organizationId">Org</td>
+                            <td class="sort-key" data-sort-key="organization.name">Org</td>
                             <td class="sort-key" data-sort-key="name">Name</td>
                         </tr>
                     </thead>

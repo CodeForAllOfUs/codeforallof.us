@@ -68,12 +68,16 @@ class SearchController {
             var id = 1;
             // build list of filters for user to use
             var categories = [];
+            // dummy organization for projects that have no organization
+            var nullOrg = {id: -1, name: ''};
 
             shuffle(projects);
             projects.forEach(proj => {
                 proj.id = id++;
                 if (proj.organizationId) {
                     proj.organization = orgs[proj.organizationId-1];
+                } else {
+                    proj.organization = nullOrg;
                 }
             });
 
@@ -197,9 +201,8 @@ class SearchController {
             model = store.find('search', searchValue);
         }
 
-        // apply user-supplied filters and sorts to the search results
+        // apply user-selected filters to the search results
         model = this.applyFilters(model);
-        model = this.applySorts(model);
 
         this.lastSearch = searchValue;
         this.orgListController.render(model.org);
@@ -279,13 +282,6 @@ class SearchController {
                 }
             }
         });
-        ret.project = model.project.slice();
-        return ret;
-    }
-
-    applySorts(model) {
-        var ret = {};
-        ret.org = model.org.slice();
         ret.project = model.project.slice();
         return ret;
     }

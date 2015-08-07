@@ -29,3 +29,31 @@ export function listen(el, eventName, handler) {
         });
     }
 }
+
+export function addClass(el, name) {
+    if (!el || !name || !(el instanceof Object) || el.className === void 0) {
+        return;
+    }
+
+    var classes = el.className.split(/\s+/);
+    if (classes.indexOf(name) === -1) {
+        if (classes.length === 0 || classes.length === 1 && classes[0] === '') {
+            el.className = name;
+        } else {
+            el.className += ' ' + name;
+        }
+    }
+}
+
+export function removeClass(el, name) {
+    if (!el || !name || !(el instanceof Object) || el.className === void 0) {
+        return;
+    }
+
+    var classes = el.className.split(/\s+/);
+    var idx = classes.indexOf(name);
+    if (idx !== -1) {
+        classes.splice(idx, 1);
+        el.className = classes.join(' ');
+    }
+}

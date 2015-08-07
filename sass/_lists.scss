@@ -3,6 +3,13 @@
     color: red;
 }
 
-.list:empty + .empty-list-msg {
-    display: block;
+.list-empty {
+    .list-table { display: none; }
+    .empty-list-msg { display: block; }
+}
+
+.remove-sort { display: none; }
+
+.user-sort {
+    .remove-sort { display: block; }
 }

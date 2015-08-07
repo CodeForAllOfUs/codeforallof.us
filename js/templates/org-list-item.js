@@ -2,7 +2,6 @@ export function OrgListItem(ctx) {
     var listItem = document.createElement('tr');
     var tpl =
     `
-        <td class="list-item-id">${ctx.id}</td>
         <td>
             <h2><a href="${ctx.homepage}">${ctx.name}</a></h2>
             <p>${ctx.description}</p>

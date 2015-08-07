@@ -7,7 +7,7 @@ class SearchView extends EventEmitter {
         this.el = $$(opts.el)[0];
 
         // DOM event becomes EventEmitter event
-        listen(this.el, 'keyup', (evt) => {
+        listen(this.el, 'keyup', evt => {
             this.emit('keyup', evt);
         });
     }
