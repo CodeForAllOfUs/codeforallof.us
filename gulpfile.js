@@ -44,7 +44,7 @@ var jsonGlob = [
 
 // fonts vars
 var fontsGlob = [
-    source + '/bower_components/bootstrap-sass/assets/fonts/**/*.*',
+    source + '/bower_components/font-awesome/fonts/**/*.*',
 ];
 
 // images vars

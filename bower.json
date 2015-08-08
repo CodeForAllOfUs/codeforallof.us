@@ -19,6 +19,7 @@
     "angular": "~1.4.0",
     "html5shiv": "~3.7.2",
     "bootstrap-sass": "~3.3.5",
-    "jquery": "~1.11.3"
+    "jquery": "~1.11.3",
+    "font-awesome": "~4.4.0"
   }
 }
