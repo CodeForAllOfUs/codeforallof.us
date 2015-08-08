@@ -1,10 +1,12 @@
 import EventEmitter from 'classes/event-emitter';
 import { $$, listen, addClass, removeClass } from 'utils/dom';
+import * as templates from 'templates';
 
 class ListContainerView extends EventEmitter {
     constructor(opts = {}) {
         super();
         this.el = $$(opts.el)[0];
+        this.loadingEl = templates.Loading(' NOW LOADING');
 
         this.init();
     }
@@ -23,8 +25,8 @@ class ListContainerView extends EventEmitter {
         });
     }
 
-    render(model, sortKey, isSortAsc) {
-        if (model.length === 0) {
+    render(isListEmpty, sortKey, isSortAsc) {
+        if (isListEmpty) {
             addClass(this.el, 'list-empty');
         } else {
             removeClass(this.el, 'list-empty');
@@ -34,6 +36,20 @@ class ListContainerView extends EventEmitter {
             addClass(this.el, 'user-sort');
         } else {
             removeClass(this.el, 'user-sort');
+        }
+    }
+
+    hideLoading() {
+        var classname = '.' + this.loadingEl.className;
+        if ($$(classname, this.el).length) {
+            this.el.removeChild(this.loadingEl);
+        }
+    }
+
+    showLoading() {
+        var classname = '.' + this.loadingEl.className;
+        if ($$(classname, this.el).length === 0) {
+            this.el.appendChild(this.loadingEl);
         }
     }
 }

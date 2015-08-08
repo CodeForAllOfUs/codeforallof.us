@@ -9,6 +9,7 @@ class ListController extends EventEmitter {
         this.chunkSize = opts.chunkSize || 1;
         this.sortKey = 'id';
         this.isSortAsc = true;
+        this.loading = false;
 
         // model
         // hold the results to render out chunks at a time
@@ -63,16 +64,36 @@ class ListController extends EventEmitter {
 
     render(model = this.model) {
         var firstChunk = model.slice(0, this.chunkSize);
+        var isListEmpty = firstChunk.length === 0;
+
+        // cancel appending any pending next chunks
+        this.loading = false;
+        this.listContainerView.hideLoading();
+
         this.model = model;
-        this.listContainerView.render(firstChunk, this.sortKey, this.isSortAsc);
+        this.listContainerView.render(isListEmpty, this.sortKey, this.isSortAsc);
         this.listView.render(firstChunk);
     }
 
     appendChunk(startIndex) {
         var listView = this.listView;
+        var listContainerView = this.listContainerView;
         var model = this.model;
         var chunkSize = this.chunkSize;
-        listView.receiveNextChunk(model.slice(startIndex, startIndex + chunkSize));
+
+        // since typing in the search will change the results,
+        // keeping track of this flag can prevent rendering chunks
+        // from a previous search after they return from an API call.
+        this.loading = true;
+        listContainerView.showLoading();
+
+        // simulate API fetching
+        setTimeout(() => {
+            if (this.loading) {
+                listView.receiveNextChunk(model.slice(startIndex, startIndex + chunkSize));
+                listContainerView.hideLoading();
+            }
+        }, 2000);
     }
 }
 

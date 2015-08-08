@@ -163,14 +163,7 @@ class SearchController {
             this.filters.categories.splice(idx, 1);
         }
 
-        // simulate API fetching
-        setTimeout(() => {
-            // if the search text has been changed since we added these filters,
-            // let the normal keyboard event handling events handle the render
-            if (this.lastSearch === lastSearch) {
-                this.renderSearch(lastSearch);
-            }
-        }, 500);
+        this.renderSearch(lastSearch);
     }
 
     handleKeyup(evt) {
