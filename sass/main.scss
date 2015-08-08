@@ -1,4 +1,11 @@
-/*   libs    */
+/*  global variables  */
+// Bootstrap fonts
+// defaults to `bootstrap/` if asset path helpers are used, and `../fonts/bootstrap/` otherwise.
+$icon-font-path: "../fonts/bootstrap/";
+$icon-font-name: "glyphicons-halflings-regular";
+
+/*  libs  */
+@import 'bootstrap-custom';
 
 /*  general  */
 @import 'global';
