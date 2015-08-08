@@ -1,12 +1,14 @@
 /*  global variables  */
-// Bootstrap fonts
-// defaults to `bootstrap/` if asset path helpers are used, and `../fonts/bootstrap/` otherwise.
-$icon-font-path: "../fonts/bootstrap/";
-$icon-font-name: "glyphicons-halflings-regular";
 
 /*  libs  */
 @import 'bootstrap-custom';
+@import '../bower_components/font-awesome/scss/font-awesome.scss';
 
 /*  general  */
 @import 'global';
-@import 'lists';
+
+/*   views   */
+@import 'views/search';
+@import 'views/filters';
+@import 'views/list-container';
+@import 'views/list';

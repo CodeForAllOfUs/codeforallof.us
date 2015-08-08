@@ -1,0 +1,29 @@
+#search-area {
+    position: relative;
+    padding: 1em 0;
+}
+
+#text-search {
+    label {
+        position: absolute;
+        top: 9px;
+        left: 30px;
+        font-size: 18px;
+    }
+
+    input {
+        padding-left: 38px;
+        padding-right: 43px;
+        height: 46px;
+        border-radius: 23px;
+    }
+
+    button {
+        position: absolute;
+        top: 10px;
+        right: 23px;
+        background: none;
+        border: none;
+        font-size: 18px;
+    }
+}

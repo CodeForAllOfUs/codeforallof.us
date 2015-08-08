@@ -1,0 +1,28 @@
+.remove-sort { display: none; }
+.user-sort {
+    .remove-sort { display: block; }
+}
+
+.empty-list-msg { display: none; }
+.list-empty {
+    .list-table { display: none; }
+    .empty-list-msg { display: block; }
+}
+
+.list-table {
+    width: 100%;
+    td { padding: 10px; }
+}
+
+.sort-header {
+    border-bottom: 1px dashed black;
+    td { padding-bottom: 0; }
+}
+
+.list {
+    h3 { margin: 0; }
+}
+
+.list-item {
+    vertical-align: top;
+}
