@@ -1,4 +1,4 @@
-import Levenshtein from '../../../js/classes/levenshtein';
+import Levenshtein from '../../../../js/classes/levenshtein';
 
 describe('Levenshtein', function() {
     describe('General', function () {

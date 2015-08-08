@@ -1,4 +1,4 @@
-import DataStore from '../../../js/classes/data-store';
+import DataStore from '../../../../js/classes/data-store';
 
 // this will test certain functions that are assumed to work in following test categories
 describe('DataStore Prelim Tests', function () {

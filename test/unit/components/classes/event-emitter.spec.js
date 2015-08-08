@@ -1,4 +1,4 @@
-import EventEmitter from '../../../js/classes/event-emitter';
+import EventEmitter from '../../../../js/classes/event-emitter';
 
 describe('Event Emitter', function() {
     var e;
