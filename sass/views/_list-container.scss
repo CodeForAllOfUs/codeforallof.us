@@ -1,5 +1,16 @@
-.remove-sort { display: none; }
-.user-sort {
+.list-section {
+    h2 {
+        margin: 0;
+        float: left;
+    }
+}
+
+.remove-sort {
+    display: none;
+    float: left;
+    margin-left: 10px;
+}
+.user-sorted {
     .remove-sort { display: block; }
 }
 

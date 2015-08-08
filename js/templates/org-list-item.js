@@ -3,7 +3,7 @@ export function OrgListItem(ctx) {
     var tpl =
     `
         <td>
-            <h2><a href="${ctx.homepage}">${ctx.name}</a></h2>
+            <h3><a href="${ctx.homepage}">${ctx.name}</a></h3>
             <p>${ctx.description}</p>
         </td>
     `;

@@ -2,7 +2,7 @@ import SearchController from 'controllers/search';
 
 var App = {
     search: new SearchController({
-        searchEl: '#search',
+        searchEl: '#text-search',
         filterEl: '#filters',
         orgEl: '#organizations',
         projectEl: '#projects',

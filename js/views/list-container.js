@@ -33,9 +33,9 @@ class ListContainerView extends EventEmitter {
         }
 
         if (sortKey !== 'id') {
-            addClass(this.el, 'user-sort');
+            addClass(this.el, 'user-sorted');
         } else {
-            removeClass(this.el, 'user-sort');
+            removeClass(this.el, 'user-sorted');
         }
     }
 

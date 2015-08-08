@@ -2,7 +2,7 @@ export function Filter(name) {
     var filter = document.createElement('div');
     var tpl =
     `
-        <input type="checkbox" checked="checked" value="${name}"><span class="filter-name">${name}</span>
+        <label class="filter-name"><input type="checkbox" checked="checked" value="${name}"> ${name}</label>
     `;
 
     filter.className = 'filter';

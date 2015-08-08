@@ -1,10 +1,16 @@
 export function ProjectListItem(ctx) {
     var listItem = document.createElement('tr');
+    var githubLink = '';
+
+    if (ctx.github) {
+        githubLink = ` <a href="${ctx.github}"><i class="fa fa-github"></i></a>`;
+    }
+
     var tpl =
     `
         <td class="list-item-id">${ctx.organization.name}</td>
         <td>
-            <h2><a href="${ctx.homepage}">${ctx.name}</a></h2>
+            <h3><a href="${ctx.homepage}">${ctx.name}</a>${githubLink}</h3>
             <p>${ctx.description}</p>
         </td>
     `;

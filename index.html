@@ -9,14 +9,20 @@
     <body>
         <div id="intro">
         </div>
-        <div class="search-area">
-            <input id="search" type="text" placeholder="Search" />
-            <div id="filters"></div>
-        </div>
-        <div id="results">
-            <div id="organizations">
-                <h1>Organizations</h1>
-                <button class="remove-sort" data-sort-key="id">Remove Sorting</button>
+        <section id="search-area">
+            <div id="text-search" class="row">
+                <div class="col-md-4 col-md-offset-4">
+                    <label for="searchbar"><i class="fa fa-search"></i></label>
+                    <input id="searchbar" class="form-control input-lg" type="search" placeholder="Search" />
+                    <button class="hidden"><i class="fa fa-times"></i></button>
+                </div>
+            </div>
+            <div id="filters" class="col-md-12"></div>
+        </section>
+        <section id="results" class="row">
+            <section id="organizations" class="list-section col-md-6">
+                <h2><i class="fa fa-globe"></i> Organizations</h1>
+                <button class="remove-sort btn btn-sm btn-default" data-sort-key="id">Remove Sorting</button>
                 <table class="list-table">
                     <thead class="sort-header">
                         <tr>
@@ -26,11 +32,11 @@
                     <tbody class="list"></tbody>
                 </table>
                 <div class="empty-list-msg">There were no organizations that matched your search.</div>
-            </div>
+            </section>
 
-            <div id="projects">
-                <h1>Projects</h1>
-                <button class="remove-sort" data-sort-key="id">Remove Sorting</button>
+            <section id="projects" class="list-section col-md-6">
+                <h2><i class="fa fa-code-fork"></i> Projects</h1>
+                <button class="remove-sort btn btn-sm btn-default" data-sort-key="id">Remove Sorting</button>
                 <table class="list-table">
                     <thead class="sort-header">
                         <tr>
@@ -41,8 +47,8 @@
                     <tbody class="list"></tbody>
                 </table>
                 <div class="empty-list-msg">There were no projects that matched your search.</div>
-            </div>
-        </div>
+            </section>
+        </section>
         <script src="scripts/libs.js" type="text/javascript" charset="utf-8"></script>
         <script src="scripts/app.js" type="text/javascript" charset="utf-8"></script>
         <script type="text/javascript" charset="utf-8">
