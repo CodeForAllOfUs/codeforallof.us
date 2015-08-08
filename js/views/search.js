@@ -13,18 +13,19 @@ class SearchView extends EventEmitter {
 
     init() {
         this.addListeners();
+        this.setClearButton();
     }
 
     addListeners() {
-        listen(this.searchBox, 'keyup', evt => {
+        listen(this.searchBox, 'keyup', () => {
             this.setClearButton();
-            this.emit('keyup', evt);
+            this.emit('keyup', this.searchBox.value);
         });
 
-        listen(this.clearButton, 'click', evt => {
+        listen(this.clearButton, 'click', () => {
             this.searchBox.value = '';
             this.setClearButton();
-            this.emit('keyup', evt);
+            this.emit('keyup', this.searchBox.value);
         });
     }
 

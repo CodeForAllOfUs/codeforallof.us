@@ -5,6 +5,10 @@
     }
 }
 
+.list-title {
+    @include clearfix;
+}
+
 .remove-sort {
     display: none;
     float: left;

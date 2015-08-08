@@ -47,7 +47,7 @@ class SearchController {
             this.initLevenshtein();
             this.filterView.render(this.store.all('category'));
             this.addListeners();
-            this.renderSearch('');
+            this.renderSearch(this.searchView.searchBox.value);
         });
     }
 
@@ -166,8 +166,8 @@ class SearchController {
         this.renderSearch(lastSearch);
     }
 
-    handleKeyup(evt) {
-        this.renderSearch(evt.target.value);
+    handleKeyup(searchValue) {
+        this.renderSearch(searchValue);
     }
 
     renderSearch(searchValue) {
