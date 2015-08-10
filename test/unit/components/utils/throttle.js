@@ -62,4 +62,22 @@ describe('Throttle Utility', function() {
             }, delay);
         },10);
     });
+
+    it('keeps the context the wrapper was called from', function(done) {
+        var delay = 1;
+        var spyFalling = sinon.spy();
+        var spyRising = sinon.spy();
+        var obj = {
+            funcFalling: throttle(spyFalling, delay),
+            funcRising: throttle(spyRising, delay, true),
+        };
+
+        obj.funcFalling();
+        obj.funcRising();
+        setTimeout(function() {
+            spyFalling.should.have.been.calledOn(obj);
+            spyRising.should.have.been.calledOn(obj);
+            done();
+        }, delay);
+    });
 });

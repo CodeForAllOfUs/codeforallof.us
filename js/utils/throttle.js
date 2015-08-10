@@ -10,7 +10,7 @@ function throttle(func, delay, risingEdge = false) {
 
     return function(...args) {
         if (risingEdge && !timer) {
-            func(...args);
+            func.apply(this, args);
         }
 
         clearTimeout(timer);
@@ -19,7 +19,7 @@ function throttle(func, delay, risingEdge = false) {
             timer = null;
 
             if (!risingEdge) {
-                func(...args);
+                func.apply(this, args);
             }
         }, delay);
     };
