@@ -641,6 +641,65 @@ describe('DataStore', function () {
             retrieved.newAttr.should.equal(duplicate.newAttr);
         });
 
+        it('merges using a deep extend only', function() {
+            var retrieved;
+            var fill = {
+                id: 'sushi',
+                title: 'title 1',
+                obj: {
+                    attr: 'hi',
+                    innerArray: [1,2,3],
+                    innerObj: {x: 1, y: 2},
+                },
+                array: [1,2,{x: 1}]
+            };
+            var duplicate = {
+                id: 'sushi',
+                title: 'new title',
+                obj: {
+                    attr: 'hello',
+                    another: 'hi',
+                    innerArray: [4,5],
+                    innerObj: {y:3, z:4},
+                },
+                anotherObj: {
+                    attr: 'hey',
+                    another: [1,2,3],
+                },
+                array: [7,8,{y:2}, ['z']],
+            };
+
+            store.load(type, fill);
+            store.all(type).length.should.equal(1);
+
+            retrieved = store.all(type)[0];
+            expect(retrieved).to.exist;
+            retrieved.id.should.equal(fill.id);
+            retrieved.title.should.equal(fill.title);
+            retrieved.obj.should.deep.equal(fill.obj);
+            retrieved.obj.should.not.equal(fill.obj);
+            retrieved.array.should.deep.equal(fill.array);
+            retrieved.array.should.not.equal(fill.array);
+            expect(retrieved.anotherObj).to.not.exist;
+
+            store.load(type, duplicate);
+            store.all(type).length.should.equal(1);
+
+            retrieved = store.all(type)[0];
+            expect(retrieved).to.exist;
+            retrieved.obj.should.deep.equal(duplicate.obj);
+            retrieved.obj.should.not.equal(duplicate.obj);
+            retrieved.obj.innerArray.should.not.equal(duplicate.obj.innerArray);
+            retrieved.obj.innerObj.should.not.equal(duplicate.obj.innerObj);
+            retrieved.anotherObj.should.deep.equal(duplicate.anotherObj);
+            retrieved.anotherObj.should.not.equal(duplicate.anotherObj);
+            retrieved.anotherObj.another.should.not.equal(duplicate.anotherObj.another);
+            retrieved.array.should.deep.equal(duplicate.array);
+            retrieved.array.should.not.equal(duplicate.array);
+            retrieved.array[2].should.not.equal(duplicate.array[2]);
+            retrieved.array[3].should.not.equal(duplicate.array[3]);
+        });
+
         it('sorts objects based on an arbitrary key', function () {
             var models = [{
                 id: 1,
