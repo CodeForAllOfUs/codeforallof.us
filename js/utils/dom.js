@@ -35,6 +35,11 @@ export function addClass(el, name) {
         return;
     }
 
+    if (el.classList) {
+        el.classList.add(name);
+        return;
+    }
+
     var classes = el.className.split(/\s+/);
     if (classes.indexOf(name) === -1) {
         if (classes.length === 0 || classes.length === 1 && classes[0] === '') {
@@ -50,10 +55,24 @@ export function removeClass(el, name) {
         return;
     }
 
+    if (el.classList) {
+        el.classList.remove(name);
+        return;
+    }
+
     var classes = el.className.split(/\s+/);
     var idx = classes.indexOf(name);
     if (idx !== -1) {
         classes.splice(idx, 1);
         el.className = classes.join(' ');
     }
+}
+
+export function windowRect() {
+    return {
+        x: window.pageXOffset || document.documentElement.scrollLeft,
+        y: window.pageYOffset || document.documentElement.scrollTop,
+        width: window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth,
+        height: window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight,
+    };
 }
