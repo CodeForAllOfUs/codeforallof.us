@@ -25,14 +25,16 @@
                     <h2><i class="fa fa-globe"></i> Organizations</h1>
                     <button class="remove-sort btn btn-sm btn-default" data-sort-key="id">Remove Sorting</button>
                 </div>
-                <table class="list-table">
-                    <thead class="sort-header">
-                        <tr>
-                            <td class="sort-key" data-sort-key="name">Name</td>
-                        </tr>
-                    </thead>
-                    <tbody class="list"></tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="list-table table table-hover table-bordered">
+                        <thead class="sort-header">
+                            <tr>
+                                <td class="sort-key" data-sort-key="name">Name</td>
+                            </tr>
+                        </thead>
+                        <tbody class="list"></tbody>
+                    </table>
+                </div>
                 <div class="empty-list-msg">There were no organizations that matched your search.</div>
             </section>
 
@@ -41,15 +43,17 @@
                     <h2><i class="fa fa-code-fork"></i> Projects</h1>
                     <button class="remove-sort btn btn-sm btn-default" data-sort-key="id">Remove Sorting</button>
                 </div>
-                <table class="list-table">
-                    <thead class="sort-header">
-                        <tr>
-                            <td class="sort-key" data-sort-key="organization.name">Org</td>
-                            <td class="sort-key" data-sort-key="name">Name</td>
-                        </tr>
-                    </thead>
-                    <tbody class="list"></tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="list-table table table-hover table-bordered">
+                        <thead class="sort-header">
+                            <tr>
+                                <td class="sort-key" data-sort-key="organization.name">Org</td>
+                                <td class="sort-key" data-sort-key="name">Name</td>
+                            </tr>
+                        </thead>
+                        <tbody class="list"></tbody>
+                    </table>
+                </div>
                 <div class="empty-list-msg">There were no projects that matched your search.</div>
             </section>
         </section>
