@@ -1,0 +1,14 @@
+// @media queries based off of bootstrap
+$screen-small: 'screen and (min-width: ' + $screen-sm + ')';
+$screen-medium: 'screen and (min-width: ' + $screen-md-min + ')';
+$screen-large: 'screen and (min-width: ' + $screen-lg-min + ')';
+$screen-xsmall-only: 'screen and (max-width: ' + $screen-xs-max + ')';
+$screen-small-only: 'screen and (min-width: ' +  $screen-sm-min + ') and (max-width: ' + $screen-sm-max + ')';
+$screen-medium-only: 'screen and (min-width: ' + $screen-md-min + ') and (max-width: ' + $screen-md-max + ')';
+$screen-large-only: 'screen and (min-width: ' + $screen-lg-min + ')';
+
+@mixin media($query) {
+    @media #{$query} {
+        @content;
+    }
+}
