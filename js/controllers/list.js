@@ -9,7 +9,6 @@ class ListController extends EventEmitter {
         this.chunkSize = opts.chunkSize || 1;
         this.sortKey = 'id';
         this.isSortAsc = true;
-        this.loading = false;
 
         // model
         // hold the results to render out chunks at a time
@@ -67,12 +66,14 @@ class ListController extends EventEmitter {
         var isListEmpty = firstChunk.length === 0;
 
         // cancel appending any pending next chunks
-        this.loading = false;
+        clearTimeout(this.loadTimer);
+        this.loadTimer = null;
         this.listContainerView.hideLoading();
 
         this.model = model;
         this.listContainerView.render(isListEmpty, this.sortKey, this.isSortAsc);
         this.listView.render(firstChunk);
+        this.loadBelowFold();
     }
 
     appendChunk(startIndex) {
@@ -81,19 +82,35 @@ class ListController extends EventEmitter {
         var model = this.model;
         var chunkSize = this.chunkSize;
 
-        // since typing in the search will change the results,
-        // keeping track of this flag can prevent rendering chunks
-        // from a previous search after they return from an API call.
-        this.loading = true;
         listContainerView.showLoading();
 
+        if (this.loadTimer) {
+            return;
+        }
+
         // simulate API fetching
-        setTimeout(() => {
-            if (this.loading) {
-                listView.receiveNextChunk(model.slice(startIndex, startIndex + chunkSize));
-                listContainerView.hideLoading();
+        //
+        // since typing in the search will change the results,
+        // keeping track of this timer can prevent rendering chunks
+        // from a previous search after they return from an API call.
+        this.loadTimer = setTimeout(() => {
+            listView.receiveNextChunk(model.slice(startIndex, startIndex + chunkSize));
+            listContainerView.hideLoading();
+            this.loadTimer = null;
+        }, 1000);
+    }
+
+    // make sure the data is at least rendered below the fold,
+    // so that user scrolling triggers infinite scroll afterward
+    loadBelowFold() {
+        var loadDelay = 300;
+        var listView = this.listView;
+        setTimeout(function loadAgain() {
+            if (listView.canDoInfiniteScroll()) {
+                listView.doInfiniteScroll();
+                setTimeout(loadAgain, loadDelay);
             }
-        }, 2000);
+        }, loadDelay);
     }
 }
 

@@ -1,5 +1,6 @@
-import { $$, listen } from 'utils/dom';
 import EventEmitter from 'classes/event-emitter';
+import { $$, listen, windowRect } from 'utils/dom';
+import throttle from 'utils/throttle';
 
 class ListView extends EventEmitter {
     constructor(opts = {}) {
@@ -8,16 +9,25 @@ class ListView extends EventEmitter {
         this.template = opts.template;
         // is true when SearchController has sent all chunks
         this.listCompleted = false;
+        // is true when loading the next chunk
+        this.loading = false;
 
         this.init();
     }
 
     init() {
-        listen(document.body, 'click', () => {
-            if (!this.listCompleted) {
-                this.emit('requestNextChunk', this.el.children.length);
-            }
-        });
+        listen(window, 'scroll', throttle(this.doInfiniteScroll.bind(this), 50));
+    }
+
+    canDoInfiniteScroll() {
+        return !this.listCompleted && windowRect().height >= this.el.getBoundingClientRect().bottom;
+    }
+
+    doInfiniteScroll() {
+        if (!this.loading && this.canDoInfiniteScroll()) {
+            this.loading = true;
+            this.emit('requestNextChunk', this.el.children.length);
+        }
     }
 
     receiveNextChunk(dataSubset) {
@@ -25,12 +35,15 @@ class ListView extends EventEmitter {
             this.listCompleted = true;
         }
 
+        this.loading = false;
+
         // display next chunk
         this.appendModels(dataSubset);
     }
 
     render(models) {
         this.listCompleted = false;
+        this.loading = false;
         this.el.innerHTML = '';
         this.appendModels(models);
     }
