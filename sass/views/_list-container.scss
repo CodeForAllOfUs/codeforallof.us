@@ -20,6 +20,11 @@
     .remove-sort { display: block; }
 }
 
+.sort-key {
+    .sort-icon { display: none; }
+    &.sort-ascending .sort-icon-ascending { display: inline; }
+}
+
 .loading-icon {
     animation: spin linear infinite 1s;
     border-radius: 50%;

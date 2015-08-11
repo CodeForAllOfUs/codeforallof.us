@@ -18,7 +18,15 @@ class ListContainerView extends EventEmitter {
     addListeners() {
         listen(this.el, 'click', evt => {
             var target = evt.target;
-            var key = target.getAttribute('data-sort-key');
+            var key;
+
+            // get sort key if the sort direction icon (caret) was clicked
+            if (target.nodeName.toLowerCase() === 'i') {
+                target = target.parentNode;
+            }
+
+            key = target.getAttribute('data-sort-key');
+
             if (key) {
                 this.emit('sort', key);
             }
@@ -26,6 +34,14 @@ class ListContainerView extends EventEmitter {
     }
 
     render(isListEmpty, sortKey, isSortAsc) {
+        var allSortEls = $$('.sort-key', this.el);
+        var sortEl;
+
+        allSortEls.forEach(el => {
+            removeClass(el, 'sort-ascending');
+            removeClass(el, 'sort-descending');
+        });
+
         if (isListEmpty) {
             addClass(this.el, 'list-empty');
         } else {
@@ -33,6 +49,8 @@ class ListContainerView extends EventEmitter {
         }
 
         if (sortKey !== 'id') {
+            sortEl = allSortEls.filter(el => el.getAttribute('data-sort-key') === sortKey)[0];
+            addClass(sortEl, isSortAsc ? 'sort-ascending' : 'sort-descending');
             addClass(this.el, 'user-sorted');
         } else {
             removeClass(this.el, 'user-sorted');
