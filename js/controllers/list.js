@@ -31,37 +31,45 @@ class ListController extends EventEmitter {
     }
 
     addListeners() {
-        this.listContainerView.on('sort', this.sortBy.bind(this));
         this.listView.on('requestNextChunk', this.appendChunk.bind(this));
+        this.listContainerView.on('sort', key => {
+            if (this.sortKey === key) {
+                this.isSortAsc = !this.isSortAsc;
+            } else {
+                this.sortKey = key;
+                this.isSortAsc = true;
+            }
+            this.render();
+        });
     }
 
-    sortBy(key) {
+    sortModel() {
         function sortAsc(a, b) {
-            var i;
             // drill down into object if `key` used dot notation
-            for (i = 0; i < keys.length; ++i) {
+            for (var i = 0; i < keys.length; ++i) {
                 a = a[keys[i]];
                 b = b[keys[i]];
             }
             return a < b ? -1 : 1;
         }
-
-        var keys;
-
-        if (this.sortKey === key) {
-            this.isSortAsc = !this.sortAsc;
-            this.model.reverse();
-        } else {
-            keys = key.split('.');
-            this.sortKey = key;
-            this.isSortAsc = true;
-            this.model.sort(sortAsc);
+        function sortDesc(a, b) {
+            // drill down into object if `key` used dot notation
+            for (var i = 0; i < keys.length; ++i) {
+                a = a[keys[i]];
+                b = b[keys[i]];
+            }
+            return a < b ? 1 : -1;
         }
 
-        this.render();
+        var keys = this.sortKey.split('.');
+        var sortFunc = this.isSortAsc ? sortAsc : sortDesc;
+        this.model.sort(sortFunc);
     }
 
     render(model = this.model) {
+        this.model = model;
+        this.sortModel();
+
         var firstChunk = model.slice(0, this.chunkSize);
         var isListEmpty = firstChunk.length === 0;
 
@@ -70,7 +78,6 @@ class ListController extends EventEmitter {
         this.loadTimer = null;
         this.listContainerView.hideLoading();
 
-        this.model = model;
         this.listContainerView.render(isListEmpty, this.sortKey, this.isSortAsc);
         this.listView.render(firstChunk);
         this.loadBelowFold();
