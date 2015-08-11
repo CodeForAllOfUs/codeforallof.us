@@ -16,10 +16,4 @@ body {
     padding-left: 5px;
     padding-right: 5px;
     margin: 0 auto;
-
-    @include media($screen-medium) {
-        padding-left: 10%;
-        padding-right: 10%;
-    }
 }
-
