@@ -249,7 +249,7 @@ class SearchController {
 
         // more forgiving thresholds for small-length searches
         if (searchString.length < 10) {
-            threshold = 0.5;
+            threshold = Math.floor(searchString.length/2)/searchString.length;
         } else {
             threshold = 0.8;
         }
