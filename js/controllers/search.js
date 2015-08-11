@@ -113,7 +113,7 @@ class SearchController {
             }
 
             // don't substitute a space char; keeps search words separate
-            if (c1 === ' ') {
+            if (c1 === ' ' || c2 === ' ') {
                 return Infinity;
             }
 
