@@ -1,5 +1,6 @@
-import { $$, listen, addClass, removeClass } from 'utils/dom';
 import EventEmitter from 'classes/event-emitter';
+import { $$, listen, addClass, removeClass } from 'utils/dom';
+import keyCodesAllowed from 'utils/keyCodesAllowed';
 
 class SearchView extends EventEmitter {
     constructor(opts = {}) {
@@ -17,9 +18,11 @@ class SearchView extends EventEmitter {
     }
 
     addListeners() {
-        listen(this.searchBox, 'keyup', () => {
-            this.setClearButton();
-            this.emit('keyup', this.searchBox.value);
+        listen(this.searchBox, 'keyup', e => {
+            if (keyCodesAllowed[e.keyCode]) {
+                this.setClearButton();
+                this.emit('keyup', this.searchBox.value);
+            }
         });
 
         listen(this.clearButton, 'click', () => {
