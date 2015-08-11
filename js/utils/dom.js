@@ -7,7 +7,7 @@ export function $(id) {
 }
 
 export function $$(selector, ctx = document) {
-    return ctx.querySelectorAll(selector);
+    return Array.prototype.slice.call(ctx.querySelectorAll(selector));
 }
 
 export function listen(el, eventName, handler) {
