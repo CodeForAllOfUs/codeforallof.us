@@ -150,9 +150,9 @@ class SearchController {
     }
 
     updateCategoryFilters(name, enable) {
-        var lastSearch = this.lastSearch;
         var idx = this.filters.categories.indexOf(name);
         var exists = idx !== -1;
+        var model;
 
         if (enable && !exists) {
             this.filters.categories.push(name);
@@ -163,14 +163,15 @@ class SearchController {
             this.filters.categories.splice(idx, 1);
         }
 
-        this.renderSearch(lastSearch);
+        model = this.getSearchResults(this.lastSearch);
+        this.renderOrgs(model.org);
     }
 
     handleKeyup(searchValue) {
         this.renderSearch(searchValue);
     }
 
-    renderSearch(searchValue) {
+    getSearchResults(searchValue) {
         var lastSearch = this.lastSearch;
         var store = this.store;
         var model;
@@ -197,9 +198,22 @@ class SearchController {
         // apply user-selected filters to the search results
         model = this.applyFilters(model);
 
+        return model;
+    }
+
+    renderOrgs(orgsModel) {
+        this.orgListController.render(orgsModel);
+    }
+
+    renderProjects(projectsModel) {
+        this.projectListController.render(projectsModel);
+    }
+
+    renderSearch(searchValue) {
+        var model = this.getSearchResults(searchValue);
         this.lastSearch = searchValue;
-        this.orgListController.render(model.org);
-        this.projectListController.render(model.project);
+        this.renderOrgs(model.org);
+        this.renderProjects(model.project);
     }
 
     approximate(model, searchString) {
