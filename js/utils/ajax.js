@@ -1,11 +1,19 @@
 function ajax(obj) {
-    return new Promise(function (resolve, reject) {
+    return new Promise((resolve, reject) => {
         var data;
         var xhr = new XMLHttpRequest();
+        var headers = obj.headers || {};
+        var header;
 
         obj.type = obj.type || 'GET';
 
         xhr.open(obj.type, obj.url, true);
+
+        for (header in headers) {
+            if (headers.hasOwnProperty(header)) {
+                xhr.setRequestHeader(header, headers[header]);
+            }
+        }
 
         xhr.onreadystatechange = function() {
             if (this.readyState === 4) {
