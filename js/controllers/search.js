@@ -1,6 +1,6 @@
-import DataStore from 'classes/data-store';
+import Mochila from 'mochila';
+import Levenshtein from 'levenshtein-toolbox';
 import SearchResult from 'classes/search-result';
-import Levenshtein from 'classes/levenshtein';
 import ListController from 'controllers/list';
 import SearchView from 'views/search';
 import FilterView from 'views/filter';
@@ -19,7 +19,7 @@ class SearchController {
         this.filters = {};
 
         // models
-        this.store = new DataStore();
+        this.store = new Mochila();
 
         // views
         this.searchView = new SearchView({

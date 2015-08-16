@@ -15,11 +15,13 @@
     "tests"
   ],
   "dependencies": {
-    "loader.js": "~2.1.1",
     "angular": "~1.4.0",
     "html5shiv": "~3.7.2",
     "bootstrap-sass": "~3.3.5",
     "jquery": "~1.11.3",
-    "font-awesome": "~4.4.0"
+    "font-awesome": "~4.4.0",
+    "loader.js": "~3.3.0",
+    "levenshtein-toolbox": "^1.0.0",
+    "mochila": "^1.0.0"
   }
 }
