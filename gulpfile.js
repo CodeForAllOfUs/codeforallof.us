@@ -1,3 +1,9 @@
+var argv = require('yargs').argv;
+var django = !argv.static;
+// determine if we're doing a build
+// and if so, bypass the livereload
+var build = argv._.length ? argv._[0] === 'build' : false;
+
 var gulp = require('gulp');
 var concat = require('gulp-concat');
 var del = require('del');
@@ -15,8 +21,8 @@ var filter = require('gulp-filter');
 var browserSync = require('browser-sync').create();
 
 // dir vars
-var source = '.';
-var dest = 'public';
+var source = 'frontend';
+var dest = django ? 'static/search' : source + '/public';
 var destStylesDir = dest + '/styles';
 var destScriptsDir = dest + '/scripts';
 var destJsonDir = dest + '/data';
@@ -29,13 +35,13 @@ var jsGlob = jsDir + '/**/*.js';
 var jsLibsFile = 'libs.js';
 var jsAppFile = 'app.js';
 var jsLibsGlob = [
-    source + '/bower_components/loader.js/loader.js',
+    'bower_components/loader.js/loader.js',
     'node_modules/gulp-babel/node_modules/babel-core/browser-polyfill.js',
-    source + '/bower_components/html5shiv/dist/html5shiv.min.js',
-    source + '/bower_components/jquery/dist/jquery.min.js',
-    source + '/bower_components/bootstrap-sass/assets/javascripts/bootstrap.min.js',
-    source + '/bower_components/levenshtein-toolbox/dist/levenshtein-toolbox.amd.min.js',
-    source + '/bower_components/mochila/dist/mochila.amd.min.js',
+    'bower_components/html5shiv/dist/html5shiv.min.js',
+    'bower_components/jquery/dist/jquery.min.js',
+    'bower_components/bootstrap-sass/assets/javascripts/bootstrap.min.js',
+    'bower_components/levenshtein-toolbox/dist/levenshtein-toolbox.amd.min.js',
+    'bower_components/mochila/dist/mochila.amd.min.js',
 ];
 
 // json vars
@@ -52,13 +58,16 @@ var fontsGlob = [
 // images vars
 var imagesGlob = source + '/images/**/*.*';
 
+// html template vars
+var indexHtml = django ? 'templates/search/index.htmldjango' : source + '/index.html';
+
 // css vars
 var sassDir = source + '/sass';
 var sassGlob = sassDir + '/**/*.scss';
 
 // tasks
 // copy files
-gulp.task('copy', ['copy:json', 'copy:fonts', 'copy:images', 'copy:html']);
+gulp.task('copy', ['copy:json', 'copy:fonts', 'copy:images']);
 
 gulp.task('copy:fonts', function() {
     return gulp.src(fontsGlob)
@@ -71,7 +80,7 @@ gulp.task('copy:images', function() {
 });
 
 gulp.task('copy:html', function() {
-    return gulp.src('index.html')
+    return gulp.src(indexHtml)
         .pipe(gulp.dest(dest));
 });
 
@@ -140,9 +149,10 @@ gulp.task('sass', ['css:clean'], function() {
         .pipe(browserSync.stream());
 });
 
-gulp.task('default', ['js:libs', 'js:app', 'sass', 'copy'], function() {
+gulp.task('build', ['js:libs', 'js:app', 'sass', 'copy']);
+gulp.task('watch', ['build'], function() {
     var events =  {};
-    function run(task) {
+    function throttle(task) {
         return function(event, file) {
             var ev, timer;
 
@@ -165,13 +175,8 @@ gulp.task('default', ['js:libs', 'js:app', 'sass', 'copy'], function() {
         };
     }
 
-    browserSync.init({
-        logLevel: 'debug',
+    var bsOpts = {
         online: false,
-        server: {
-            baseDir: 'public',
-            index: 'index.html',
-        },
         port: 9000,
         ui: {
             port: 8080,
@@ -179,12 +184,24 @@ gulp.task('default', ['js:libs', 'js:app', 'sass', 'copy'], function() {
                 port: 8000,
             },
         },
-    });
+    };
 
-    browserSync.watch(jsLibsGlob, run(['js:libs']));
-    browserSync.watch(jsGlob, run(['js:app']));
-    browserSync.watch(sassGlob, run(['sass']));
-    browserSync.watch(jsonGlob, run(['copy:json']));
-    browserSync.watch('index.html', run(['copy:html']));
-    gulp.watch(dest + '/index.html').on('change', browserSync.reload);
+    if (django) {
+        bsOpts.proxy = require('./config.secret.json').browserSyncProxy;
+    } else {
+        bsOpts.server = {
+            baseDir: dest,
+            index: '../index.html',
+        };
+    }
+
+    browserSync.init(bsOpts);
+
+    gulp.watch(jsLibsGlob, throttle(['js:libs']));
+    gulp.watch(jsGlob, throttle(['js:app']));
+    gulp.watch(sassGlob, throttle(['sass']));
+    gulp.watch(jsonGlob, throttle(['copy:json']));
+    gulp.watch(indexHtml).on('change', browserSync.reload);
 });
+
+gulp.task('default', ['watch']);

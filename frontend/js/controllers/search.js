@@ -14,7 +14,7 @@ class SearchController {
         // local data
         this.lastSearch = '';
         // amount of models to render on infinite scroll trigger
-        this.chunkSize = 1;
+        this.chunkSize = 2;
         // holds the filters the user selected for the search results
         this.filters = {};
 
@@ -60,8 +60,8 @@ class SearchController {
         store.registerModelFactory('search', SearchResult);
 
         return Promise.all([
-            ajax({url: '/data/organizations.json'}),
-            ajax({url: '/data/projects.json'}),
+            ajax({url: 'data/organizations.json'}),
+            ajax({url: 'data/projects.json'}),
         ]).then(([orgs, projects]) => {
             // shuffle all orgs and projects to
             // give each a fair chance at being seen
@@ -251,6 +251,14 @@ class SearchController {
                 });
 
                 if (matches/len >= threshold && lev.totalCost() <= 3 && deletions <= 3) {
+                    console.log(obj.name);
+                    console.log(matches);
+                    console.log(matches/len);
+                    console.log(deletions);
+                    console.log(lev.totalCost());
+                    console.log(lev.reconstructPath());
+                    console.log(matchString);
+
                     return true;
                 }
             }

@@ -1,3 +1,4 @@
+# typical ignores
 node_modules
 bower_components
 __pycache__
@@ -8,8 +9,6 @@ public
 .sass-cache
 coverage
 *.secret.json
-keys
-logo
 
 # vim-related
 [._]*.s[a-w][a-z]
@@ -27,3 +26,8 @@ Session.vim
 *.db
 *.db-journal
 *.sqlite3
+
+# project-related
+*.py
+static
+templates
