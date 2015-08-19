@@ -53,11 +53,11 @@ class SearchController {
 
     initStorage() {
         var store = this.store;
-        store.addType('org');
-        store.addType('project');
-        store.addType('category');
-        store.addType('search');
-        store.registerModelFactory('search', SearchResult);
+        store.addCollection('org');
+        store.addCollection('project');
+        store.addCollection('category');
+        store.addCollection('search');
+        store.addFactory('search', SearchResult);
 
         return Promise.all([
             ajax({url: 'data/organizations.json'}),
