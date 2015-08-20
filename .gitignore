@@ -26,8 +26,3 @@ Session.vim
 *.db
 *.db-journal
 *.sqlite3
-
-# project-related
-*.py
-static
-templates
