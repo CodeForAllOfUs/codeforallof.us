@@ -3,7 +3,7 @@
         "id": 1,
         "name": "Smile for the Future",
         "homepage": "http://example.com/smileforthefuture",
-        "github": "http://github.com/",
+        "github_url": "http://github.com/",
         "description": "Working hard to make more smiles happen!",
         "categories": ["Engineering", "Health", "Science"]
     },
@@ -11,7 +11,6 @@
         "id": 2,
         "name": "Save the Weasels",
         "homepage": "http://example.com/savetheweasels",
-        "github": "http://github.com",
         "description": "The majestic weasel is one of the most necessary species on our planet. Our work is devoted to helping the weasel to be more comfortable in its natural habitat.",
         "categories": ["Environment", "Science"]
     },

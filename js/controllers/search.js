@@ -73,7 +73,7 @@ class SearchController {
 
             shuffle(projects);
             projects.forEach(proj => {
-                proj.id = id++;
+                proj.sortId = id++;
                 if (proj.organizationId) {
                     proj.organization = orgs[proj.organizationId-1];
                 } else {
@@ -86,7 +86,7 @@ class SearchController {
             orgs.forEach(org => {
                 var currCategories = org.categories;
                 var i;
-                org.id = id++;
+                org.sortId = id++;
                 for (i = 0; i < currCategories.length; ++i) {
                     categories.push({id: currCategories[i]});
                 }

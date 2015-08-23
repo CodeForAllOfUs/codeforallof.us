@@ -7,7 +7,7 @@ class ListController extends EventEmitter {
         super();
         // local data
         this.chunkSize = opts.chunkSize || 1;
-        this.sortKey = 'id';
+        this.sortKey = 'sortId';
         this.isSortAsc = true;
 
         // model

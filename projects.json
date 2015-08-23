@@ -1,14 +1,16 @@
 [
     {
+        "id": 1,
         "organizationId": 1,
         "name": "Comic Relief",
         "homepage": "http://example.com/comic-relief",
         "license": "MIT",
-        "github": "http://example.com/comic-relief-github",
+        "github_url": "http://example.com/comic-relief-github",
         "description": "A textbook that transforms into a comic book, relieving the reader of having to study all the time. Scientifically engineered to contain 2 laughs per panel.",
         "tags": ["book", "literature", "reading", "learning", "fun", "laugh"]
     },
     {
+        "id": 2,
         "organizationId": 2,
         "name": "Weasel Watcher",
         "license": "MIT",
@@ -17,6 +19,7 @@
         "tags": ["vision", "audio", "wildlife", "majestic", "weasel"]
     },
     {
+        "id": 3,
         "organizationId": 2,
         "name": "I Am Weasel",
         "license": "MIT",
@@ -25,6 +28,7 @@
         "tags": ["ai", "artificial intelligence", "machine learning", "robot", "simulation"]
     },
     {
+        "id": 4,
         "organizationId": 3,
         "name": "AnTitanic",
         "license": "MIT",
@@ -33,6 +37,7 @@
         "tags": ["water", "ocean", "seafaring", "expedition", "statistic", "modeling", "simulation", "data"]
     },
     {
+        "id": 5,
         "organizationId": 3,
         "name": "Hydrotunnel",
         "license": "MIT",
@@ -41,6 +46,7 @@
         "tags": ["transport", "propulsion", "network", "modeling", "magnets", "superconductor", "logistics"]
     },
     {
+        "id": 6,
         "organizationId": 3,
         "name": "Heavy Bubble",
         "license": "MIT",
@@ -49,6 +55,7 @@
         "tags": ["physics", "fluid dynamics", "expedition", "survey", "chemistry", "chemical", "pneumatic"]
     },
     {
+        "id": 7,
         "organizationId": null,
         "name": "Clean Soap",
         "license": "MIT",

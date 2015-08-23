@@ -48,7 +48,7 @@ class ListContainerView extends EventEmitter {
             removeClass(this.el, 'list-empty');
         }
 
-        if (sortKey !== 'id') {
+        if (sortKey !== 'sortId') {
             sortEl = allSortEls.filter(el => el.getAttribute('data-sort-key') === sortKey)[0];
             addClass(sortEl, isSortAsc ? 'sort-ascending' : 'sort-descending');
             addClass(this.el, 'user-sorted');
