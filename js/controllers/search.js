@@ -60,8 +60,8 @@ class SearchController {
         store.addFactory('search', SearchResult);
 
         return Promise.all([
-            ajax({url: 'data/organizations.json'}),
-            ajax({url: 'data/projects.json'}),
+            ajax({url: 'api/organizations'}),
+            ajax({url: 'api/projects'}),
         ]).then(([orgs, projects]) => {
             // shuffle all orgs and projects to
             // give each a fair chance at being seen
