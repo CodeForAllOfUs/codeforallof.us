@@ -1,11 +1,14 @@
 function ajax(obj) {
     return new Promise((resolve, reject) => {
-        var data;
         var xhr = new XMLHttpRequest();
-        var headers = obj.headers || {};
-        var header;
+        var headers, header, data;
+
+        if (typeof obj === 'string') {
+            obj = {url: obj};
+        }
 
         obj.type = obj.type || 'GET';
+        headers = obj.headers || {};
 
         xhr.open(obj.type, obj.url, true);
 
