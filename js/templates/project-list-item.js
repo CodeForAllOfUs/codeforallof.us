@@ -3,7 +3,7 @@ export function ProjectListItem(ctx) {
     var githubLink = '';
 
     if (ctx.github) {
-        githubLink = ` <a href="${ctx.github}"><i class="fa fa-github"></i></a>`;
+        githubLink = ` <a href="https://github.com/${ctx.github}"><i class="fa fa-github"></i></a>`;
     }
 
     var tpl =

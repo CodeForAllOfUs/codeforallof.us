@@ -3,7 +3,7 @@
         "id": 1,
         "name": "Smile for the Future",
         "homepage": "http://example.com/smileforthefuture",
-        "github_url": "http://github.com/",
+        "github": "CodeForAllOfUs/search-frontend",
         "description": "Working hard to make more smiles happen!",
         "categories": ["Engineering", "Health", "Science"]
     },
