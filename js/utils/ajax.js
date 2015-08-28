@@ -84,6 +84,8 @@ function ajax(obj) {
             }
         }
 
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
         xhr.onreadystatechange = function() {
             if (this.readyState === 4) {
                 if (this.status >= 200 && this.status < 400) {
