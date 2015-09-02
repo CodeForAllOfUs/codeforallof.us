@@ -5,7 +5,7 @@
         "name": "Comic Relief",
         "homepage": "http://example.com/comic-relief",
         "license": "MIT",
-        "github": "CodeForAllOfUs/search-backend",
+        "github_path": "CodeForAllOfUs/search-backend",
         "description": "A textbook that transforms into a comic book, relieving the reader of having to study all the time. Scientifically engineered to contain 2 laughs per panel.",
         "tags": ["book", "literature", "reading", "learning", "fun", "laugh"]
     },
