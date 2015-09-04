@@ -270,7 +270,7 @@ class SearchController {
         var threshold;
 
         // more forgiving thresholds for small-length searches
-        if (searchString.length < 10) {
+        if (searchString.length < 5) {
             threshold = Math.floor(searchString.length/2)/searchString.length;
         } else {
             threshold = 0.8;
