@@ -58,6 +58,7 @@ function runTasks(opts, done) {
                 source + '/bower_components/loader.js/loader.js',
                 source + '/node_modules/gulp-babel/node_modules/babel-core/browser-polyfill.js',
                 source + '/bower_components/html5shiv/dist/html5shiv.min.js',
+                source + '/bower_components/moment/min/moment.min.js',
                 source + '/bower_components/jquery/dist/jquery.min.js',
                 source + '/bower_components/bootstrap-sass/assets/javascripts/bootstrap.min.js',
                 source + '/bower_components/levenshtein-toolbox/dist/levenshtein-toolbox.amd.min.js',

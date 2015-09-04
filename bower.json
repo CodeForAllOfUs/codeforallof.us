@@ -22,6 +22,7 @@
     "font-awesome": "~4.4.0",
     "loader.js": "~3.3.0",
     "levenshtein-toolbox": "^1.0.0",
-    "mochila": "^2.0.0"
+    "mochila": "^2.0.0",
+    "moment": "~2.10.6"
   }
 }
