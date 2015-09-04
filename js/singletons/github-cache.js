@@ -46,11 +46,4 @@ class GitHubCache {
     }
 }
 
-var singleton;
-
-export default function() {
-    if (!singleton) {
-        singleton = new GitHubCache();
-    }
-    return singleton;
-}
+export default new GitHubCache();

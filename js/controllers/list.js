@@ -1,3 +1,4 @@
+import cache from 'singletons/github-cache';
 import EventEmitter from 'classes/event-emitter';
 import ListContainerView from 'views/list-container';
 import ListView from 'views/list';
