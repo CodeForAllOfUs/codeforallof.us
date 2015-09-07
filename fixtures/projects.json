@@ -1,0 +1,66 @@
+[
+    {
+        "id": 1,
+        "organizationId": 1,
+        "name": "Comic Relief",
+        "homepage": "http://example.com/comic-relief",
+        "license": "MIT",
+        "github_path": "CodeForAllOfUs/search-backend",
+        "description": "A textbook that transforms into a comic book, relieving the reader of having to study all the time. Scientifically engineered to contain 2 laughs per panel.",
+        "tags": ["book", "literature", "reading", "learning", "fun", "laugh"]
+    },
+    {
+        "id": 2,
+        "organizationId": 2,
+        "name": "Weasel Watcher",
+        "license": "MIT",
+        "homepage": "http://example.com/weasel-watcher",
+        "description": "Software-aided binoculars designed to mimic the look and the sounds of the majestic weasel. Makes it easier to observe them in their natural habitat undetected.",
+        "tags": ["vision", "audio", "wildlife", "majestic", "weasel"]
+    },
+    {
+        "id": 3,
+        "organizationId": 2,
+        "name": "I Am Weasel",
+        "license": "MIT",
+        "homepage": "http://example.com/i-am-weasel",
+        "description": "Simulated weasel powered by Artificial Intelligence. Modeling how a weasel interacts in a simulated environment helps to understand how some environments may be preferable to others.",
+        "tags": ["ai", "artificial intelligence", "machine learning", "robot", "simulation"]
+    },
+    {
+        "id": 4,
+        "organizationId": 3,
+        "name": "AnTitanic",
+        "license": "MIT",
+        "homepage": "http://example.org/antitanic",
+        "description": "Statistical modeling of the hulls of ships, with the intention of producing a ship unsinkable by icebergs. This research will fuel the expedition to the arctic, in our search for vast amounts of clean water.",
+        "tags": ["water", "ocean", "seafaring", "expedition", "statistic", "modeling", "simulation", "data"]
+    },
+    {
+        "id": 5,
+        "organizationId": 3,
+        "name": "Hydrotunnel",
+        "license": "MIT",
+        "homepage": "http://example.org/hydrotunnel",
+        "description": "Research into how we can use water as an efficient means of transportation. Combining ideas from MagLev trains and windtunnel research, our aim is to prove that a series of tubes of water can serve in high-speed propulsion, as well as for the delivery of water.",
+        "tags": ["transport", "propulsion", "network", "modeling", "magnets", "superconductor", "logistics"]
+    },
+    {
+        "id": 6,
+        "organizationId": 3,
+        "name": "Heavy Bubble",
+        "license": "MIT",
+        "homepage": "http://example.org/heavy-bubble",
+        "description": "Surveying how much water exists beneath the Arctic requires traveling deep beneath the surface of the ocean. Though most bubbles tend to travel in water from the depths to the surface, we're researching how to reverse this process.",
+        "tags": ["physics", "fluid dynamics", "expedition", "survey", "chemistry", "chemical", "pneumatic"]
+    },
+    {
+        "id": 7,
+        "organizationId": null,
+        "name": "Clean Soap",
+        "license": "MIT",
+        "homepage": "http://example.org/clean-soap",
+        "description": "It is estimated that more than one hundred people do not have access to clean soap. Our research aims at finding ways to take dirty soap and convert it into clean soap inexpensively.",
+        "tags": ["chemistry", "hygiene", "access", "resources", "energy", "economics"]
+    }
+]

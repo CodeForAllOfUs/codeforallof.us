@@ -1,24 +1,2 @@
 [
-    {
-        "id": 1,
-        "name": "Smile for the Future",
-        "homepage": "http://example.com/smileforthefuture",
-        "github_path": "CodeForAllOfUs",
-        "description": "Working hard to make more smiles happen!",
-        "categories": ["Engineering", "Health", "Science"]
-    },
-    {
-        "id": 2,
-        "name": "Save the Weasels",
-        "homepage": "http://example.com/savetheweasels",
-        "description": "The majestic weasel is one of the most necessary species on our planet. Our work is devoted to helping the weasel to be more comfortable in its natural habitat.",
-        "categories": ["Environment", "Science"]
-    },
-    {
-        "id": 3,
-        "name": "Wholly Water",
-        "homepage": "http://example.com/whollywater",
-        "description": "Water is Earth's second most precious liquid resource, after soda. After it was theorized that there was water beneath the Arctic, our organization is developing resources to determine exactly how much there is down there.",
-        "categories": ["Environment", "Engineering", "Resources"]
-    }
 ]

@@ -47,8 +47,8 @@ function runTasks(opts, done) {
             source + '/bower_components/font-awesome/fonts/**/*.*',
         ],
         json   : [
-            source + '/organizations.json',
-            source + '/projects.json',
+            source + '/fixtures/organizations.json',
+            source + '/fixtures/projects.json',
         ],
         js     : {
             src  : dir.js + '/**/*.js',
