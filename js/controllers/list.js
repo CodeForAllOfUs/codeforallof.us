@@ -1,7 +1,10 @@
-import cache from 'singletons/github-cache';
+import GitHubCache from 'classes/github-cache';
 import EventEmitter from 'classes/event-emitter';
 import ListContainerView from 'views/list-container';
 import ListView from 'views/list';
+
+var orgCache = new GitHubCache({url: 'api/github-data/organizations'});
+var projectCache = new GitHubCache({url: 'api/github-data/projects'});
 
 class ListController extends EventEmitter {
     constructor(opts = {}) {

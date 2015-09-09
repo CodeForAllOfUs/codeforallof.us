@@ -2,7 +2,12 @@ import Mochila from 'mochila';
 import ajax from 'utils/ajax';
 
 class GitHubCache {
-    constructor() {
+    constructor(options) {
+        if (!options.url) {
+            throw new Error('GitHubCache needs a URL to use for ajax!');
+        }
+
+        this.url = options.url;
         this.store = new Mochila();
         this.store.addCollection('*');
         this.rateLimit = {
@@ -17,7 +22,7 @@ class GitHubCache {
         }
 
         return ajax({
-            url: `api/github-data`,
+            url: this.url,
             data: list,
         }).then(data => {
             var array = [];
@@ -46,4 +51,4 @@ class GitHubCache {
     }
 }
 
-export default new GitHubCache();
+export default GitHubCache;
