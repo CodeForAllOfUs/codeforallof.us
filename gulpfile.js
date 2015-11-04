@@ -14,7 +14,7 @@ var filter = require('gulp-filter');
 // livereload and sync
 var browserSync = require('browser-sync').create();
 
-function runTasks(opts, done) {
+function createTasks(opts, taskName) {
     var source = opts.source;
     var dest = opts.dest;
 
@@ -205,16 +205,20 @@ function runTasks(opts, done) {
         gulp.watch(glob.html).on('change', browserSync.reload);
     });
 
-    gulp.start('watch');
+    if (taskName === 'build') {
+        gulp.start('build');
+    } else if (taskName === 'watch') {
+        gulp.start('watch');
+    }
 }
 
 if (process.cwd() === __dirname) {
     gulp.task('default', function(done) {
-        runTasks({
+        createTasks({
             source: __dirname,
             dest: './public',
-        }, done);
+        }, 'build');
     });
 }
 
-module.exports = runTasks;
+module.exports = createTasks;
